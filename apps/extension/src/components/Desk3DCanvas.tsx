@@ -43,22 +43,13 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
     rendererRef.current = renderer;
     mountRef.current.appendChild(renderer.domElement);
 
-    // Subtle Ambient & Directional Lighting for Comic depth
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-    scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0xfff7ed, 0.9);
-    dirLight.position.set(10, 20, 15);
-    scene.add(dirLight);
-
     // Group for desk elements
     const group = new THREE.Group();
     deskObjectsRef.current = group;
     scene.add(group);
 
-    // 1. Origami 3D Paper Airplane floating at top right
+    // 1. Origami 3D Paper Airplane floating at top right margin (bright paper with comic ink edges)
     const planeGeo = new THREE.BufferGeometry();
-    // Vertex positions for a 3D folded paper airplane
     const vertices = new Float32Array([
       // Left wing
       0, 0, 3,  -2.5, 0.5, -2,  0, 0.8, -1.8,
@@ -72,39 +63,42 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
     planeGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     planeGeo.computeVertexNormals();
 
-    const planeMat = new THREE.MeshStandardMaterial({
+    const planeMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
-      roughness: 0.4,
-      metalness: 0.05,
       side: THREE.DoubleSide,
     });
     const paperPlane = new THREE.Mesh(planeGeo, planeMat);
-    paperPlane.position.set(16, 8, 0);
+    // Add comic ink lines
+    const wireframe = new THREE.LineSegments(
+      new THREE.WireframeGeometry(planeGeo),
+      new THREE.LineBasicMaterial({ color: 0x0f172a, linewidth: 1.5 })
+    );
+    paperPlane.add(wireframe);
+
+    // Position high at top right margin out of the way of desk cards
+    paperPlane.position.set(22, 11, 0);
     paperPlane.rotation.set(-0.2, -0.6, 0.3);
     paperPlane.scale.set(0.65, 0.65, 0.65);
     group.add(paperPlane);
 
     // 2. 3D Yellow Post-it Paper with curved corner
-    const noteGeo = new THREE.PlaneGeometry(3.5, 3.5, 4, 4);
-    const noteMat = new THREE.MeshStandardMaterial({
+    const noteGeo = new THREE.PlaneGeometry(3.5, 3.5);
+    const noteMat = new THREE.MeshBasicMaterial({
       color: 0xfef08a,
-      roughness: 0.6,
       side: THREE.DoubleSide,
     });
     const sticky3d = new THREE.Mesh(noteGeo, noteMat);
-    sticky3d.position.set(-17, -7, 0);
+    sticky3d.position.set(-22, -9, 0);
     sticky3d.rotation.set(0.1, 0.3, -0.15);
     group.add(sticky3d);
 
     // 3. 3D Pushpin on top of note
     const pinHeadGeo = new THREE.SphereGeometry(0.35, 16, 16);
-    const pinMat = new THREE.MeshStandardMaterial({
+    const pinMat = new THREE.MeshBasicMaterial({
       color: 0xef4444,
-      metalness: 0.3,
-      roughness: 0.2,
     });
     const pinHead = new THREE.Mesh(pinHeadGeo, pinMat);
-    pinHead.position.set(-17, -5.2, 0.4);
+    pinHead.position.set(-22, -7.2, 0.4);
     group.add(pinHead);
 
     // Handle Resize
@@ -125,10 +119,10 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
       const elapsedTime = clock.getElapsedTime();
 
       // Idle float
-      paperPlane.position.y = 8 + Math.sin(elapsedTime * 1.5) * 0.4;
-      paperPlane.rotation.z = 0.3 + Math.cos(elapsedTime * 1.2) * 0.08;
+      paperPlane.position.y = 11 + Math.sin(elapsedTime * 1.5) * 0.3;
+      paperPlane.rotation.z = 0.3 + Math.cos(elapsedTime * 1.2) * 0.05;
 
-      sticky3d.rotation.z = -0.15 + Math.sin(elapsedTime * 0.8) * 0.03;
+      sticky3d.rotation.z = -0.15 + Math.sin(elapsedTime * 0.8) * 0.02;
 
       renderer.render(scene, camera);
     };
@@ -153,8 +147,8 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
   // Handle subtle mouse parallax on Three.js group
   useEffect(() => {
     if (!deskObjectsRef.current || !enabled) return;
-    const targetRotX = mouseY * sensitivity * 0.15;
-    const targetRotY = mouseX * sensitivity * 0.15;
+    const targetRotX = mouseY * sensitivity * 0.12;
+    const targetRotY = mouseX * sensitivity * 0.12;
 
     deskObjectsRef.current.rotation.x = targetRotX;
     deskObjectsRef.current.rotation.y = targetRotY;

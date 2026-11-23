@@ -130,9 +130,10 @@
   box-shadow: 1px 1px 0px #0f172a;
 }
 
-/* Curled corner effect */
+/* Curled corner effect - subtle, natural, no clunky grey triangles */
 .paper-curl-br {
   position: relative;
+  overflow: hidden;
 }
 
 .paper-curl-br::after {
@@ -140,12 +141,9 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 0 18px 18px;
-  border-color: transparent transparent #e2e8f0 transparent;
-  box-shadow: -2px -2px 3px rgba(0, 0, 0, 0.12);
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, transparent 50%, rgba(15, 23, 42, 0.08) 50%);
   pointer-events: none;
 }
 
