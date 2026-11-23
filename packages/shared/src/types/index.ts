@@ -29,7 +29,18 @@ export interface Note {
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 
-export type TaskCategory = 'Today' | 'Personal' | 'Development' | 'Ideas' | 'Later';
+export type TaskCategory = 'Today' | 'Personal' | 'Development' | 'Ideas' | 'Later' | string;
+
+export interface TodoSheet {
+  id: string;
+  title: string;
+  category: string;
+  paperColor: 'yellow' | 'cream' | 'white' | 'pink' | 'blue' | 'green';
+  pinType: 'red' | 'yellow' | 'blue' | 'tape';
+  position: { x: number; y: number; zIndex: number };
+  rotation: number;
+  createdAt: string;
+}
 
 export interface Task {
   id: string;

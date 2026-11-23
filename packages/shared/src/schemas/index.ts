@@ -32,7 +32,7 @@ export const TaskSchema = z.object({
   completedAt: z.string().nullable().optional(),
   priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
   dueDate: z.string().nullable().optional(),
-  category: z.enum(['Today', 'Personal', 'Development', 'Ideas', 'Later']).default('Today'),
+  category: z.string().default('Today'),
   position: z.number().default(0),
   revision: z.number().default(1),
   createdAt: z.string(),

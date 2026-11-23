@@ -1,4 +1,4 @@
-import { Bookmark, Note, Task, UserSettings } from '../types/index.js';
+import { Bookmark, Note, Task, TodoSheet, UserSettings } from '../types/index.js';
 
 export const DEFAULT_BOOKMARKS: Bookmark[] = [
   {
@@ -168,6 +168,29 @@ export const DEFAULT_NOTES: Note[] = [
     revision: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+  },
+];
+
+export const DEFAULT_TODO_SHEETS: TodoSheet[] = [
+  {
+    id: 'sheet-today',
+    title: "TODAY'S LITTLE GOALS",
+    category: 'Today',
+    paperColor: 'yellow',
+    pinType: 'red',
+    position: { x: 300, y: 15, zIndex: 15 },
+    rotation: -1,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'sheet-personal',
+    title: 'PERSONAL & LIFE',
+    category: 'Personal',
+    paperColor: 'cream',
+    pinType: 'blue',
+    position: { x: 670, y: 15, zIndex: 16 },
+    rotation: 1.5,
+    createdAt: new Date().toISOString(),
   },
 ];
 

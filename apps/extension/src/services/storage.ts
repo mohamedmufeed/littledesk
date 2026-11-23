@@ -2,16 +2,19 @@ import {
   Note,
   Task,
   Bookmark,
+  TodoSheet,
   UserSettings,
   DEFAULT_NOTES,
   DEFAULT_TASKS,
   DEFAULT_BOOKMARKS,
+  DEFAULT_TODO_SHEETS,
   DEFAULT_USER_SETTINGS,
 } from '@littledesk/shared';
 
 const STORAGE_KEYS = {
   NOTES: 'littledesk_notes',
   TASKS: 'littledesk_tasks',
+  TODO_SHEETS: 'littledesk_todo_sheets',
   BOOKMARKS: 'littledesk_bookmarks',
   SETTINGS: 'littledesk_settings',
   RECENT_SEARCHES: 'littledesk_recent_searches',
@@ -72,19 +75,21 @@ class StorageService {
   async loadWorkspace(): Promise<{
     notes: Note[];
     tasks: Task[];
+    sheets: TodoSheet[];
     bookmarks: Bookmark[];
     settings: UserSettings;
     recentSearches: string[];
   }> {
-    const [notes, tasks, bookmarks, settings, recentSearches] = await Promise.all([
+    const [notes, tasks, sheets, bookmarks, settings, recentSearches] = await Promise.all([
       this.getItem<Note[]>(STORAGE_KEYS.NOTES, DEFAULT_NOTES),
       this.getItem<Task[]>(STORAGE_KEYS.TASKS, DEFAULT_TASKS),
+      this.getItem<TodoSheet[]>(STORAGE_KEYS.TODO_SHEETS, DEFAULT_TODO_SHEETS),
       this.getItem<Bookmark[]>(STORAGE_KEYS.BOOKMARKS, DEFAULT_BOOKMARKS),
       this.getItem<UserSettings>(STORAGE_KEYS.SETTINGS, DEFAULT_USER_SETTINGS),
       this.getItem<string[]>(STORAGE_KEYS.RECENT_SEARCHES, ['Vite React 19', 'Tailwind CSS', 'Comic illustration tips']),
     ]);
 
-    return { notes, tasks, bookmarks, settings, recentSearches };
+    return { notes, tasks, sheets, bookmarks, settings, recentSearches };
   }
 
   async saveNotes(notes: Note[]): Promise<void> {
@@ -93,6 +98,10 @@ class StorageService {
 
   async saveTasks(tasks: Task[]): Promise<void> {
     await this.setItem(STORAGE_KEYS.TASKS, tasks);
+  }
+
+  async saveTodoSheets(sheets: TodoSheet[]): Promise<void> {
+    await this.setItem(STORAGE_KEYS.TODO_SHEETS, sheets);
   }
 
   async saveBookmarks(bookmarks: Bookmark[]): Promise<void> {

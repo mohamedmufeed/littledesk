@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  ClipboardList,
   Cloud,
   Plus,
   RefreshCw,
@@ -17,6 +18,7 @@ interface HeaderProps {
   onOpenSettings: () => void;
   onOpenAccount: () => void;
   onNewNote: () => void;
+  onNewSheet: () => void;
   onManualSync: () => void;
 }
 
@@ -27,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
   onOpenAccount,
   onNewNote,
+  onNewSheet,
   onManualSync,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -124,6 +127,18 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-rose-700">Sync Failed</span>
             </>
           )}
+        </button>
+
+        {/* Add To-Do Sheet Button */}
+        <button
+          onClick={() => {
+            sounds.playPaperRustle();
+            onNewSheet();
+          }}
+          className="comic-btn flex items-center gap-1.5 bg-white text-slate-900 font-comic font-bold tracking-wide px-3 py-1.5 rounded-md text-sm cursor-pointer hover:bg-slate-50"
+        >
+          <ClipboardList className="w-4 h-4 text-desk-comicRed" />
+          <span>New To-Do Sheet</span>
         </button>
 
         {/* Add Note Button */}

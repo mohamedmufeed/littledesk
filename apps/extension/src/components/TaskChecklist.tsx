@@ -1,30 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 import {
-  Calendar,
-  Check,
-  ChevronRight,
-  Filter,
   GripHorizontal,
-  Layers,
   Plus,
   Trash2,
 } from 'lucide-react';
-import { Task, TaskCategory, TaskPriority } from '@littledesk/shared';
+import { Task, TaskPriority, TodoSheet } from '@littledesk/shared';
 import { sounds } from '../utils/sound.js';
 
 interface TaskChecklistProps {
+  sheets: TodoSheet[];
   tasks: Task[];
-  sheetPositions: Record<string, { x: number; y: number; zIndex: number }>;
   onToggleTask: (id: string) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'revision'>) => void;
   onDeleteTask: (id: string) => void;
   onUpdatePriority: (id: string, priority: TaskPriority) => void;
-  onSheetDragEnd: (sheetKey: string, x: number, y: number) => void;
+  onSheetDragEnd: (sheetId: string, x: number, y: number) => void;
+  onDeleteSheet: (sheetId: string) => void;
+  onOpenNewSheetModal: () => void;
 }
-
-const CATEGORIES: TaskCategory[] = ['Today', 'Personal', 'Development', 'Ideas', 'Later'];
-const TASKS_PER_CARD = 4; // Maximum tasks per physical sheet before expanding to the right!
 
 const PRIORITY_STYLES: Record<
   TaskPriority,
@@ -36,108 +30,47 @@ const PRIORITY_STYLES: Record<
   low: { label: 'LOW', bg: 'bg-slate-200', text: 'text-slate-600', border: 'border-slate-400' },
 };
 
-const SHEET_PINS = ['pushpin-red', 'pushpin-yellow', 'pushpin-blue'];
-const SHEET_ROTATIONS = [-1, 1.4, -1.8, 1.2];
+const PAPER_COLORS: Record<TodoSheet['paperColor'], string> = {
+  yellow: 'bg-[#FEFDF0]',
+  cream: 'bg-[#FAF3E0]',
+  white: 'bg-[#FFFFFF]',
+  pink: 'bg-[#FFE4E6]',
+  blue: 'bg-[#E0F2FE]',
+  green: 'bg-[#DCFCE7]',
+};
 
 export const TaskChecklist: React.FC<TaskChecklistProps> = ({
+  sheets,
   tasks,
-  sheetPositions,
   onToggleTask,
   onAddTask,
   onDeleteTask,
   onUpdatePriority,
   onSheetDragEnd,
+  onDeleteSheet,
+  onOpenNewSheetModal,
 }) => {
-  const [activeCategory, setActiveCategory] = useState<TaskCategory | 'All'>('Today');
-
-  // Filter tasks based on active category
-  const filteredTasks = tasks.filter((t) => {
-    if (activeCategory === 'All') return true;
-    return t.category === activeCategory;
-  });
-
-  const remainingCount = tasks.filter((t) => !t.completed).length;
-
-  // Split tasks into sheets of 4 items max (No scrollbars! Overflow forms a new sheet)
-  const taskSheets: Task[][] = [];
-  if (filteredTasks.length === 0) {
-    taskSheets.push([]);
-  } else {
-    for (let i = 0; i < filteredTasks.length; i += TASKS_PER_CARD) {
-      taskSheets.push(filteredTasks.slice(i, i + TASKS_PER_CARD));
-    }
-  }
-
   return (
     <>
-      {/* Category Filter Toolbar docked above the canvas */}
-      <div className="w-full flex items-center justify-between max-w-5xl mx-auto px-4 mb-2 z-20">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-          <span className="font-comic text-xs uppercase font-bold text-slate-500 mr-1 flex items-center gap-1">
-            <Filter className="w-3.5 h-3.5" />
-            <span>List:</span>
-          </span>
-          <button
-            onClick={() => {
-              sounds.playComicClick();
-              setActiveCategory('All');
-            }}
-            className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all border ${
-              activeCategory === 'All'
-                ? 'bg-slate-900 text-white border-slate-900 shadow-comicPressed'
-                : 'bg-white/80 text-slate-700 border-slate-300 hover:bg-white'
-            }`}
-          >
-            All Goals
-          </button>
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                sounds.playComicClick();
-                setActiveCategory(cat);
-              }}
-              className={`px-3 py-1 rounded-full font-bold whitespace-nowrap transition-all border ${
-                activeCategory === cat
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-comicPressed'
-                  : 'bg-white/80 text-slate-700 border-slate-300 hover:bg-white'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <div className="hidden sm:flex items-center gap-1 text-[11px] font-comic font-bold text-slate-500">
-          <Layers className="w-3.5 h-3.5 text-desk-comicRed" />
-          <span>
-            {taskSheets.length} Draggable Sheet{taskSheets.length > 1 ? 's' : ''} • Grab & move anywhere!
-          </span>
-        </div>
-      </div>
-
-      {/* Render Each To-Do Sheet as a Freely Draggable Paper Card */}
-      {taskSheets.map((sheetTasks, sheetIdx) => {
-        const sheetKey = `sheet-${activeCategory}-${sheetIdx}`;
-        const defaultX = 320 + sheetIdx * 360;
-        const defaultY = 15;
-        const savedPos = sheetPositions[sheetKey] || { x: defaultX, y: defaultY, zIndex: 15 + sheetIdx };
+      {sheets.map((sheet, index) => {
+        // Filter tasks for this specific sheet
+        const sheetTasks = tasks.filter(
+          (t) => t.category.toLowerCase() === sheet.category.toLowerCase()
+        );
 
         return (
-          <DraggableTaskCard
-            key={sheetKey}
-            sheetKey={sheetKey}
-            sheetIdx={sheetIdx}
-            totalSheets={taskSheets.length}
+          <DraggableNotepadSheet
+            key={sheet.id}
+            sheet={sheet}
+            sheetIdx={index}
+            totalSheets={sheets.length}
             tasks={sheetTasks}
-            initialPos={savedPos}
-            activeCategory={activeCategory}
             onToggleTask={onToggleTask}
             onAddTask={onAddTask}
             onDeleteTask={onDeleteTask}
             onUpdatePriority={onUpdatePriority}
             onDragEnd={onSheetDragEnd}
-            remainingCount={remainingCount}
+            onDeleteSheet={onDeleteSheet}
           />
         );
       })}
@@ -145,56 +78,59 @@ export const TaskChecklist: React.FC<TaskChecklistProps> = ({
   );
 };
 
-interface DraggableTaskCardProps {
-  sheetKey: string;
+interface DraggableNotepadSheetProps {
+  sheet: TodoSheet;
   sheetIdx: number;
   totalSheets: number;
   tasks: Task[];
-  initialPos: { x: number; y: number; zIndex: number };
-  activeCategory: TaskCategory | 'All';
   onToggleTask: (id: string) => void;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'revision'>) => void;
   onDeleteTask: (id: string) => void;
   onUpdatePriority: (id: string, priority: TaskPriority) => void;
-  onDragEnd: (sheetKey: string, x: number, y: number) => void;
-  remainingCount: number;
+  onDragEnd: (sheetId: string, x: number, y: number) => void;
+  onDeleteSheet: (sheetId: string) => void;
 }
 
-const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
-  sheetKey,
+const DraggableNotepadSheet: React.FC<DraggableNotepadSheetProps> = ({
+  sheet,
   sheetIdx,
   totalSheets,
   tasks,
-  initialPos,
-  activeCategory,
   onToggleTask,
   onAddTask,
   onDeleteTask,
   onUpdatePriority,
   onDragEnd,
-  remainingCount,
+  onDeleteSheet,
 }) => {
-  const [currentPos, setCurrentPos] = useState(initialPos);
+  const [currentPos, setCurrentPos] = useState(sheet.position);
   const [isDragging, setIsDragging] = useState(false);
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
 
   useEffect(() => {
-    setCurrentPos(initialPos);
-  }, [initialPos.x, initialPos.y, initialPos.zIndex]);
+    setCurrentPos(sheet.position);
+  }, [sheet.position.x, sheet.position.y, sheet.position.zIndex]);
 
-  const pinColor = SHEET_PINS[sheetIdx % SHEET_PINS.length];
-  const rotation = SHEET_ROTATIONS[sheetIdx % SHEET_ROTATIONS.length];
-  const isFirstSheet = sheetIdx === 0;
+  const remainingCount = tasks.filter((t) => !t.completed).length;
+  const paperBg = PAPER_COLORS[sheet.paperColor] || PAPER_COLORS.yellow;
 
-  // Freeform Mouse Drag Handling
+  // Pin Class
+  const pinClass =
+    sheet.pinType === 'yellow'
+      ? 'pushpin-yellow'
+      : sheet.pinType === 'blue'
+      ? 'pushpin-blue'
+      : 'pushpin-red';
+
+  // Dragging handler
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       (e.target as HTMLElement).closest('button') ||
       (e.target as HTMLElement).closest('input') ||
       (e.target as HTMLElement).closest('svg') ||
-      (e.target as HTMLElement).closest('.task-interactive')
+      (e.target as HTMLElement).closest('.task-item')
     ) {
       return;
     }
@@ -223,7 +159,7 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
       window.removeEventListener('mouseup', handleMouseUp);
       const deltaX = upEvent.clientX - startClientX;
       const deltaY = upEvent.clientY - startClientY;
-      onDragEnd(sheetKey, startPosX + deltaX, startPosY + deltaY);
+      onDragEnd(sheet.id, startPosX + deltaX, startPosY + deltaY);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -240,7 +176,7 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
       description: '',
       completed: false,
       priority: newPriority,
-      category: activeCategory === 'All' ? 'Today' : activeCategory,
+      category: sheet.category,
       position: tasks.length,
       dueDate: 'Today',
     });
@@ -269,50 +205,61 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
     <div
       onMouseDown={handleMouseDown}
       style={{
-        transform: `translate3d(${currentPos.x}px, ${currentPos.y}px, 0) rotate(${rotation}deg)`,
+        transform: `translate3d(${currentPos.x}px, ${currentPos.y}px, 0) rotate(${sheet.rotation || 0}deg)`,
         zIndex: isDragging ? 80 : currentPos.zIndex || 15,
         position: 'absolute',
       }}
-      className={`w-80 sm:w-[340px] bg-[#FEFDF0] border-2 border-slate-900 rounded-xl p-4 pt-6 paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${
+      className={`w-80 sm:w-[340px] ${paperBg} border-2 border-slate-900 rounded-xl p-4 pt-6 paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${
         isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-comic hover:shadow-comicLg'
       }`}
     >
-      {/* Pushpin on Top Center of the Sheet Card */}
-      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 pushpin ${pinColor}`} />
+      {/* Pin or Tape Header Graphic */}
+      {sheet.pinType === 'tape' ? (
+        <div className="masking-tape h-3.5 w-24 mx-auto -mt-8 mb-4 opacity-90 rounded-xs" />
+      ) : (
+        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 pushpin ${pinClass}`} />
+      )}
 
       {/* Sheet Header */}
       <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-3">
-        <div>
-          <h3 className="font-comic text-lg text-slate-900 tracking-wider flex items-center gap-1.5 leading-tight">
-            <span>{isFirstSheet ? '📋' : '📑'}</span>
-            <span>
-              {isFirstSheet
-                ? activeCategory === 'All'
-                  ? "TODAY'S LITTLE GOALS"
-                  : `${activeCategory.toUpperCase()} GOALS`
-                : `${activeCategory.toUpperCase()} • SHEET ${sheetIdx + 1}`}
-            </span>
+        <div className="pr-2">
+          <h3 className="font-comic text-lg text-slate-900 tracking-wider flex items-center gap-1.5 leading-tight truncate">
+            <span>📋</span>
+            <span className="truncate">{sheet.title}</span>
           </h3>
           <p className="font-handwritten text-xs font-bold text-slate-600">
-            {isFirstSheet
-              ? remainingCount === 0
-                ? '🎉 All caught up!'
-                : `${remainingCount} task${remainingCount === 1 ? '' : 's'} remaining`
-              : `Overflow Sheet (${tasks.length}/${TASKS_PER_CARD} tasks)`}
+            {remainingCount === 0 ? '🎉 All caught up!' : `${remainingCount} task${remainingCount === 1 ? '' : 's'} remaining`}
           </p>
         </div>
 
-        {/* Quick Add Toggle Button on this Sheet */}
-        <button
-          onClick={() => {
-            sounds.playPaperRustle();
-            setIsInputOpen(!isInputOpen);
-          }}
-          title="Scribble a task on this sheet"
-          className="comic-btn bg-desk-comicYellow text-slate-950 p-1.5 rounded-md text-xs font-bold"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-        </button>
+        {/* Action Controls */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => {
+              sounds.playPaperRustle();
+              setIsInputOpen(!isInputOpen);
+            }}
+            title="Scribble a new task on this sheet"
+            className="comic-btn bg-desk-comicYellow text-slate-950 p-1.5 rounded-md text-xs font-bold"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+          </button>
+
+          {totalSheets > 1 && (
+            <button
+              onClick={() => {
+                if (window.confirm(`Remove the "${sheet.title}" to-do sheet?`)) {
+                  sounds.playComicClick();
+                  onDeleteSheet(sheet.id);
+                }
+              }}
+              title="Remove this sheet"
+              className="text-slate-400 hover:text-rose-600 p-1 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Expandable Add Task Form on this Sheet */}
@@ -361,7 +308,7 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
       <div className="space-y-2">
         {tasks.length === 0 ? (
           <div className="text-center py-7 text-slate-400 font-handwritten text-base font-semibold">
-            ✨ No tasks here. Tap '+' above to scribble one!
+            ✨ Clean sheet! Tap '+' above to scribble a task.
           </div>
         ) : (
           tasks.map((task) => {
@@ -370,7 +317,7 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
             return (
               <div
                 key={task.id}
-                className={`task-interactive group flex items-center justify-between p-2 rounded-lg border transition-all duration-150 ${
+                className={`task-item group flex items-center justify-between p-2 rounded-lg border transition-all duration-150 ${
                   task.completed
                     ? 'bg-slate-100/70 border-slate-200 opacity-60'
                     : 'bg-white border-slate-900/30 hover:border-slate-900 shadow-xs'
@@ -443,14 +390,14 @@ const DraggableTaskCard: React.FC<DraggableTaskCardProps> = ({
         )}
       </div>
 
-      {/* Sheet Footer with subtle Drag Handle Hint */}
+      {/* Sheet Footer with subtle Drag Handle */}
       <div className="mt-3 pt-2 border-t border-slate-900/10 flex items-center justify-between text-[10px] text-slate-400 font-comic">
         <span className="flex items-center gap-1 text-slate-500">
           <GripHorizontal className="w-3 h-3 text-slate-400" />
           <span>Sheet {sheetIdx + 1} of {totalSheets} • Drag to move</span>
         </span>
-        {tasks.length >= TASKS_PER_CARD && (
-          <span className="text-desk-comicRed font-bold">Full sheet →</span>
+        {tasks.length >= 4 && (
+          <span className="text-desk-comicRed font-bold">4 tasks</span>
         )}
       </div>
     </div>
