@@ -26,7 +26,7 @@ import { SettingsModal } from './components/SettingsModal.js';
 import { ShortcutModal } from './components/ShortcutModal.js';
 import { ShortcutsGrid } from './components/ShortcutsGrid.js';
 import { TaskChecklist } from './components/TaskChecklist.js';
-import { api } from './services/api.js';
+import { api, setApiBaseUrl } from './services/api.js';
 import { storage } from './services/storage.js';
 import { sounds } from './utils/sound.js';
 
@@ -61,6 +61,9 @@ export default function App() {
   useEffect(() => {
     async function initWorkspace() {
       try {
+        const savedApiUrl = await storage.getCustomApiUrl();
+        if (savedApiUrl) setApiBaseUrl(savedApiUrl);
+
         const data = await storage.loadWorkspace();
 
         // Migrate any positions from previous sub-container layout if y < 70

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Cloud,
   Check,
@@ -17,7 +17,8 @@ import {
   X,
 } from 'lucide-react';
 import { SearchProvider, UserSettings, WallpaperTheme } from '@littledesk/shared';
-import { api } from '../services/api.js';
+import { api, getApiBaseUrl, setApiBaseUrl } from '../services/api.js';
+import { storage } from '../services/storage.js';
 import { sounds } from '../utils/sound.js';
 
 interface SettingsModalProps {
@@ -89,6 +90,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [authPassword, setAuthPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+
+  // Custom Cloud Server URL
+  const [serverUrl, setServerUrl] = useState('');
+  const [serverSavedMsg, setServerSavedMsg] = useState('');
+
+  useEffect(() => {
+    storage.getCustomApiUrl().then((saved) => {
+      setServerUrl(saved || getApiBaseUrl());
+    });
+  }, [isOpen]);
+
+  const handleSaveServerUrl = async () => {
+    sounds.playPaperRustle();
+    await storage.saveCustomApiUrl(serverUrl);
+    setApiBaseUrl(serverUrl);
+    setServerSavedMsg('Saved! Testing connection...');
+    setTimeout(() => {
+      onManualSync();
+      setServerSavedMsg('');
+    }, 1200);
+  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -277,6 +299,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <RefreshCw className={`w-3.5 h-3.5 ${syncState === 'syncing' ? 'animate-spin' : ''}`} />
                   <span>Sync Now</span>
                 </button>
+              </div>
+
+              {/* Custom Cloud Server URL config */}
+              <div className="bg-white border-2 border-slate-900 rounded-xl p-3.5 shadow-xs">
+                <label className="block font-comic text-xs font-bold text-slate-800 mb-1">
+                  🌐 Backend Cloud API URL:
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={serverUrl}
+                    onChange={(e) => setServerUrl(e.target.value)}
+                    placeholder="https://your-api.onrender.com/api or http://localhost:5001/api"
+                    className="flex-1 bg-slate-50 border border-slate-900/40 rounded-lg px-2.5 py-1 text-xs font-mono text-slate-900 focus:outline-none focus:border-slate-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveServerUrl}
+                    className="comic-btn bg-desk-comicYellow text-slate-950 font-comic text-xs font-bold px-3 py-1 rounded-lg whitespace-nowrap cursor-pointer"
+                  >
+                    Save URL
+                  </button>
+                </div>
+                {serverSavedMsg && (
+                  <p className="text-[11px] font-comic font-bold text-emerald-600 mt-1">{serverSavedMsg}</p>
+                )}
+                <p className="text-[10px] text-slate-500 mt-1 font-comic">
+                  Default: <span className="font-mono">http://localhost:5001/api</span> • When hosted on Render, Railway, etc., paste your cloud URL here.
+                </p>
               </div>
 
               {/* User Account Details or Login/Register Form */}

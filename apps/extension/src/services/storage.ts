@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
   USER_INFO: 'littledesk_user_info',
   LAST_SYNC: 'littledesk_last_sync',
   SHEET_POSITIONS: 'littledesk_sheet_positions',
+  CUSTOM_API_URL: 'littledesk_custom_api_url',
 };
 
 // Check if running inside Chrome extension environment
@@ -161,6 +162,14 @@ class StorageService {
 
   async saveSheetPositions(positions: Record<string, { x: number; y: number; zIndex: number }>): Promise<void> {
     await this.setItem(STORAGE_KEYS.SHEET_POSITIONS, positions);
+  }
+
+  async getCustomApiUrl(): Promise<string> {
+    return this.getItem<string>(STORAGE_KEYS.CUSTOM_API_URL, '');
+  }
+
+  async saveCustomApiUrl(url: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.CUSTOM_API_URL, url);
   }
 }
 

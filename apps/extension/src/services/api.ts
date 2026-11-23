@@ -9,6 +9,27 @@ import {
 } from '@littledesk/shared';
 import { storage } from './storage.js';
 
+let customBaseUrl: string | null = null;
+
+export const setApiBaseUrl = (url: string | null) => {
+  if (url && url.trim()) {
+    let clean = url.trim().replace(/\/$/, '');
+    if (!clean.endsWith('/api')) {
+      clean += '/api';
+    }
+    customBaseUrl = clean;
+  } else {
+    customBaseUrl = null;
+  }
+};
+
+export const getApiBaseUrl = (): string => {
+  if (customBaseUrl) return customBaseUrl;
+  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL;
+  if (envUrl) return envUrl.replace(/\/$/, '');
+  return 'http://localhost:5001/api';
+};
+
 export const API_BASE_URL = 'http://localhost:5001/api';
 
 class ApiService {
@@ -25,7 +46,7 @@ class ApiService {
 
   async checkHealth(): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE_URL}/health`, { signal: AbortSignal.timeout(2000) });
+      const res = await fetch(`${getApiBaseUrl()}/health`, { signal: AbortSignal.timeout(2000) });
       return res.ok;
     } catch {
       return false;
@@ -33,7 +54,7 @@ class ApiService {
   }
 
   async register(name: string, email: string, password: string): Promise<AuthResponse> {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
@@ -51,7 +72,7 @@ class ApiService {
   }
 
   async login(email: string, password: string): Promise<AuthResponse> {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -72,7 +93,7 @@ class ApiService {
     try {
       const { refreshToken } = await storage.getAuthTokens();
       if (refreshToken) {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        await fetch(`${getApiBaseUrl()}/auth/logout`, {
           method: 'POST',
           headers: await this.getHeaders(),
           body: JSON.stringify({ refreshToken }),
@@ -86,7 +107,7 @@ class ApiService {
   }
 
   async getMe(): Promise<any> {
-    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+    const res = await fetch(`${getApiBaseUrl()}/auth/me`, {
       headers: await this.getHeaders(),
     });
     if (!res.ok) throw new Error('Not authenticated');
@@ -94,7 +115,7 @@ class ApiService {
   }
 
   async pushSync(payload: SyncPushPayload): Promise<{ success: boolean; syncedAt: string }> {
-    const res = await fetch(`${API_BASE_URL}/sync/push`, {
+    const res = await fetch(`${getApiBaseUrl()}/sync/push`, {
       method: 'POST',
       headers: await this.getHeaders(),
       body: JSON.stringify(payload),
@@ -107,7 +128,7 @@ class ApiService {
   }
 
   async pullSync(lastSyncedAt?: string): Promise<SyncPullResponse> {
-    const url = new URL(`${API_BASE_URL}/sync/pull`);
+    const url = new URL(`${getApiBaseUrl()}/sync/pull`);
     if (lastSyncedAt) {
       url.searchParams.set('since', lastSyncedAt);
     }
