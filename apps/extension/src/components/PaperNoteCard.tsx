@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Archive, Edit3, Pin, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit3, Pin, Trash2 } from 'lucide-react';
 import { Note, NoteColor } from '@littledesk/shared';
 import { sounds } from '../utils/sound.js';
 
@@ -9,6 +9,7 @@ interface PaperNoteCardProps {
   onDelete: (id: string) => void;
   onTogglePin: (id: string) => void;
   onColorChange: (id: string, color: NoteColor) => void;
+  onToggleCollapse?: (id: string) => void;
   onDragEnd: (id: string, x: number, y: number) => void;
 }
 
@@ -30,6 +31,7 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
   onDelete,
   onTogglePin,
   onColorChange,
+  onToggleCollapse,
   onDragEnd,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -62,20 +64,22 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
       window.removeEventListener('mouseup', handleMouseUp);
       const deltaX = upEvent.clientX - startClientX;
       const deltaY = upEvent.clientY - startClientY;
-      const finalX = startPosX + deltaX;
-      const finalY = startPosY + deltaY;
-      onDragEnd(note.id, finalX, finalY);
+      onDragEnd(note.id, startPosX + deltaX, startPosY + deltaY);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
   };
 
-  const sizeClasses = {
-    sm: 'w-56 min-h-[140px]',
-    md: 'w-64 min-h-[160px]',
-    lg: 'w-76 min-h-[200px]',
-  }[note.size || 'md'];
+  const isCollapsed = Boolean(note.isCollapsed);
+
+  const sizeClasses = isCollapsed
+    ? 'w-56 py-2 px-3'
+    : {
+        sm: 'w-56 min-h-[140px]',
+        md: 'w-64 min-h-[160px]',
+        lg: 'w-76 min-h-[200px]',
+      }[note.size || 'md'];
 
   return (
     <div
@@ -85,10 +89,11 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         zIndex: isDragging ? 100 : note.position.zIndex || 10,
         position: 'absolute',
       }}
-      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
-        }`}
+      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing transition-all duration-150 ${
+        isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
+      }`}
     >
-      {/* Pin or Tape Attached Directly to the Top of the Paper Sheet */}
+      {/* Pin or Tape Header */}
       {note.pinType === 'red' && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 pushpin pushpin-red pointer-events-none" />
       )}
@@ -105,17 +110,32 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 masking-tape h-4 w-24 opacity-90 rounded-xs pointer-events-none z-10" />
       )}
 
-            {/* Top: Title & Pin/Edit Controls */}
+      {/* Top: Title & Controls */}
       <div>
-            <div className="flex items-start justify-between gap-2 border-b border-slate-900/15 pb-1.5 mb-2">
-              <h3
-                onClick={() => onEdit(note)}
-                className="font-comic text-base text-slate-900 tracking-wide font-bold line-clamp-1 hover:text-desk-comicRed cursor-pointer"
-              >
-                {note.title || 'Untitled Note'}
-              </h3>
+        <div className="flex items-center justify-between gap-1.5 border-b border-slate-900/15 pb-1 mb-1">
+          <h3
+            onClick={() => onEdit(note)}
+            className="font-comic text-sm sm:text-base text-slate-900 tracking-wide font-bold line-clamp-1 hover:text-desk-comicRed cursor-pointer flex-1"
+          >
+            {note.title || 'Untitled Note'}
+          </h3>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-0.5">
+            {/* Collapse / Expand Toggle Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                sounds.playPaperRustle();
+                onToggleCollapse?.(note.id);
+              }}
+              title={isCollapsed ? 'Unfold note' : 'Fold note'}
+              className="p-1 rounded hover:bg-black/5 text-slate-600"
+            >
+              {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            </button>
+
+            {!isCollapsed && (
+              <>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -123,8 +143,9 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                     onTogglePin(note.id);
                   }}
                   title={note.isPinned ? 'Unpin' : 'Pin to top'}
-                  className={`p-1 rounded hover:bg-black/5 ${note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
-                    }`}
+                  className={`p-1 rounded hover:bg-black/5 ${
+                    note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
+                  }`}
                 >
                   <Pin className="w-3.5 h-3.5" />
                 </button>
@@ -139,49 +160,55 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                 </button>
-              </div>
-            </div>
+              </>
+            )}
+          </div>
+        </div>
 
-              {/* Note Content */}
-              <div
-                onClick={() => onEdit(note)}
-                className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer"
-              >
-                {note.content || 'Tap here to scribble thoughts...'}
-              </div>
-            </div>
+        {/* Note Content (Only shown when not collapsed) */}
+        {!isCollapsed && (
+          <div
+            onClick={() => onEdit(note)}
+            className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer mt-1"
+          >
+            {note.content || 'Tap here to scribble thoughts...'}
+          </div>
+        )}
+      </div>
 
-            {/* Footer: Color Switcher & Delete Button */}
-            <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-900/10">
-              {/* Quick Color Switcher */}
-              <div className="flex items-center gap-1">
-                {COLOR_OPTIONS.map((c) => (
-                  <button
-                    key={c}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      sounds.playComicClick();
-                      onColorChange(note.id, c);
-                    }}
-                    className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
-                      }`}
-                    style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
-                  />
-                ))}
-              </div>
-
+      {/* Footer: Color Switcher & Delete Button (Only shown when not collapsed) */}
+      {!isCollapsed && (
+        <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-900/10">
+          <div className="flex items-center gap-1">
+            {COLOR_OPTIONS.map((c) => (
               <button
+                key={c}
                 onClick={(e) => {
                   e.stopPropagation();
                   sounds.playComicClick();
-                  onDelete(note.id);
+                  onColorChange(note.id, c);
                 }}
-                title="Delete note"
-                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
+                className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${
+                  note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
+                }`}
+                style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
+              />
+            ))}
           </div>
-          );
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              sounds.playComicClick();
+              onDelete(note.id);
+            }}
+            title="Delete note"
+            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 };

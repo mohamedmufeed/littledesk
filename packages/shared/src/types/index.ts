@@ -19,6 +19,7 @@ export interface Note {
   size: NoteSize;
   isPinned: boolean;
   isArchived: boolean;
+  isCollapsed?: boolean;
   pinnedToDesk?: boolean;
   pinType?: 'red' | 'yellow' | 'blue' | 'tape-top' | 'tape-corner' | 'none';
   revision: number;
@@ -39,6 +40,7 @@ export interface TodoSheet {
   pinType: 'red' | 'yellow' | 'blue' | 'tape';
   position: { x: number; y: number; zIndex: number };
   rotation: number;
+  isCollapsed?: boolean;
   createdAt: string;
 }
 
