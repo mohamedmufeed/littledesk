@@ -42,7 +42,7 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
         paperColor,
         pinType,
         position: {
-          x: Math.max(40, Math.min(window.innerWidth - 380, 260 + Math.random() * 240)),
+          x: Math.max(40, Math.min(window.innerWidth - 380, 80 + Math.random() * Math.max(200, window.innerWidth - 500))),
           y: Math.max(20, Math.min(window.innerHeight - 350, 40 + Math.random() * 120)),
           zIndex: 25,
         },
