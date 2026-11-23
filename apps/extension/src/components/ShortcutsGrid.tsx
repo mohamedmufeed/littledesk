@@ -30,7 +30,7 @@ export const ShortcutsGrid: React.FC<ShortcutsGridProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 z-20 my-3">
+    <div className="w-full max-w-5xl mx-auto px-4 z-10 my-3">
       {/* Launchpad Header Tag */}
       <div className="flex items-center justify-between mb-3 px-2">
         <div className="inline-flex items-center gap-2 bg-white/90 border border-slate-900 rounded-md px-2.5 py-1 shadow-sm">

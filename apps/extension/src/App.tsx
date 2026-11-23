@@ -487,141 +487,142 @@ export default function App() {
       />
 
       {/* Top Header */}
-      <div className="gsap-fade-in z-30 relative">
-        <Header
-          settings={settings}
-          syncState={syncState}
-          user={user}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          onOpenAccount={() => setIsSettingsOpen(true)}
-          onNewNote={handleCreateNote}
-          onNewSheet={() => setIsNewSheetModalOpen(true)}
-          onManualSync={handleManualSync}
-        />
-      </div>
-
-      {/* Main Controls: Search + Shortcuts + Toolbar */}
-      <main className="relative z-20 w-full px-4 sm:px-8 flex flex-col pointer-events-none">
-        {/* Prominent Search Bar */}
-        <div className="gsap-fade-in w-full my-0.5 pointer-events-auto">
-          <SearchBar
-            provider={settings.searchProvider}
-            recentSearches={recentSearches}
-            onProviderChange={handleProviderChange}
-            onAddRecentSearch={handleAddRecentSearch}
-            onClearRecentSearches={handleClearRecentSearches}
-          />
-        </div>
-
-        {/* Website Shortcuts Launchpad */}
-        <div className="gsap-pop w-full my-0.5 pointer-events-auto">
-          <ShortcutsGrid
-            bookmarks={bookmarks}
-            onOpenBookmark={handleOpenBookmark}
-            onEditBookmark={(bm) => {
-              setEditingBookmark(bm);
-              setIsBookmarkModalOpen(true);
-            }}
-            onDeleteBookmark={handleDeleteBookmark}
-            onAddBookmark={() => {
-              setEditingBookmark(null);
-              setIsBookmarkModalOpen(true);
-            }}
-          />
-        </div>
-      </main>
-
-      {/* FREEFORM DESK CANVAS: Spans the ENTIRE DESK (100vw x 100vh) */}
-      <div className="absolute inset-0 pointer-events-none z-15 overflow-hidden">
-        {showTodos && (
-          <TaskChecklist
-            sheets={todoSheets}
-            tasks={tasks}
-            onToggleTask={handleToggleTask}
-            onAddTask={handleAddTask}
-            onDeleteTask={handleDeleteTask}
-            onUpdatePriority={handleUpdateTaskPriority}
-            onSheetDragEnd={handleSheetDragEnd}
-            onDeleteSheet={handleDeleteTodoSheet}
-            onToggleCollapseSheet={handleToggleCollapseSheet}
-            onOpenNewSheetModal={() => setIsNewSheetModalOpen(true)}
-          />
-        )}
-
-        {showNotes &&
-          notes.map((note) => (
-            <PaperNoteCard
-              key={note.id}
-              note={note}
-              onEdit={(n) => {
-                setEditingNote(n);
-                setIsNoteModalOpen(true);
-              }}
-              onDelete={handleDeleteNote}
-              onTogglePin={handleToggleNotePin}
-              onColorChange={handleNoteColorChange}
-              onToggleCollapse={handleToggleCollapseNote}
-              onDragEnd={handleNoteDragEnd}
+        <div className="gsap-fade-in z-30 relative">
+            <Header
+              settings={settings}
+              syncState={syncState}
+              user={user}
+              onOpenSettings={() => setIsSettingsOpen(true)}
+              onOpenAccount={() => setIsSettingsOpen(true)}
+              onNewNote={handleCreateNote}
+              onNewSheet={() => setIsNewSheetModalOpen(true)}
+              onManualSync={handleManualSync}
             />
-          ))}
-      </div>
+          </div>
 
-      {/* Subtle Footer Watermark */}
-      <footer className="w-full text-center py-1 z-20 relative select-none opacity-40 hover:opacity-100 transition-opacity pointer-events-none">
-        <span className="font-comic text-[11px] tracking-wider font-bold text-slate-800 pointer-events-auto">
-          LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search • Fold notes or drag anywhere
-        </span>
-      </footer>
+          {/* Main Controls: Search + Shortcuts */}
+          <main className="relative z-30 w-full px-4 sm:px-8 flex flex-col pointer-events-none">
+            {/* Prominent Search Bar */}
+            <div className="gsap-fade-in w-full my-0.5 pointer-events-auto relative z-40">
+              <SearchBar
+                provider={settings.searchProvider}
+                recentSearches={recentSearches}
+                onProviderChange={handleProviderChange}
+                onAddRecentSearch={handleAddRecentSearch}
+                onClearRecentSearches={handleClearRecentSearches}
+              />
+            </div>
 
-                  {/* --- Modals --- */}
-                  {/* 1. Note Editor Modal */}
-                  <NoteEditorModal
-                    note={editingNote}
-                    isOpen={isNoteModalOpen}
-                    onClose={() => {
-                      setIsNoteModalOpen(false);
-                      setEditingNote(null);
+                {/* Website Shortcuts Launchpad */}
+                <div className="gsap-pop w-full my-0.5 pointer-events-auto relative z-10">
+                  <ShortcutsGrid
+                    bookmarks={bookmarks}
+                    onOpenBookmark={handleOpenBookmark}
+                    onEditBookmark={(bm) => {
+                      setEditingBookmark(bm);
+                      setIsBookmarkModalOpen(true);
                     }}
-                    onSave={handleSaveNote}
-                    onDelete={handleDeleteNote}
-                  />
-
-                  {/* 2. Shortcut Add/Edit Modal */}
-                  <ShortcutModal
-                    bookmark={editingBookmark}
-                    isOpen={isBookmarkModalOpen}
-                    onClose={() => {
-                      setIsBookmarkModalOpen(false);
+                    onDeleteBookmark={handleDeleteBookmark}
+                    onAddBookmark={() => {
                       setEditingBookmark(null);
+                      setIsBookmarkModalOpen(true);
                     }}
-                    onSave={handleSaveBookmark}
-                    onDelete={handleDeleteBookmark}
-                  />
-
-                  {/* 3. Settings & Cloud Sync Modal */}
-                  <SettingsModal
-                    settings={settings}
-                    isOpen={isSettingsOpen}
-                    user={user}
-                    onClose={() => setIsSettingsOpen(false)}
-                    onUpdateSettings={handleUpdateSettings}
-                    onResetDefaults={handleResetDefaults}
-                    onAuthSuccess={(u) => setUser(u)}
-                    onLogout={() => {
-                      setUser(null);
-                      storage.setAuthTokens(null);
-                      setSyncState('offline');
-                    }}
-                    onManualSync={handleManualSync}
-                    syncState={syncState}
-                  />
-
-                  {/* 4. Pin New To-Do Sheet Modal */}
-                  <NewSheetModal
-                    isOpen={isNewSheetModalOpen}
-                    onClose={() => setIsNewSheetModalOpen(false)}
-                    onCreateSheet={handleCreateTodoSheet}
                   />
                 </div>
-                );
+              </main>
+
+              {/* FREEFORM DESK CANVAS: Spans the ENTIRE DESK (100vw x 100vh) */}
+              <div className="absolute inset-0 pointer-events-none z-15 overflow-hidden">
+                {showTodos && (
+                  <TaskChecklist
+                    sheets={todoSheets}
+                    tasks={tasks}
+                    onToggleTask={handleToggleTask}
+                    onAddTask={handleAddTask}
+                    onDeleteTask={handleDeleteTask}
+                    onUpdatePriority={handleUpdateTaskPriority}
+                    onSheetDragEnd={handleSheetDragEnd}
+                    onDeleteSheet={handleDeleteTodoSheet}
+                    onToggleCollapseSheet={handleToggleCollapseSheet}
+                    onOpenNewSheetModal={() => setIsNewSheetModalOpen(true)}
+                  />
+                )}
+
+                    {
+                  showNotes &&
+                notes.map((note) => (
+                  <PaperNoteCard
+                    key={note.id}
+                    note={note}
+                    onEdit={(n) => {
+                      setEditingNote(n);
+                      setIsNoteModalOpen(true);
+                    }}
+                    onDelete={handleDeleteNote}
+                    onTogglePin={handleToggleNotePin}
+                    onColorChange={handleNoteColorChange}
+                    onToggleCollapse={handleToggleCollapseNote}
+                    onDragEnd={handleNoteDragEnd}
+                  />
+                ))}
+        </div>
+
+        {/* Subtle Footer Watermark */}
+        <footer className="w-full text-center py-1 z-20 relative select-none opacity-40 hover:opacity-100 transition-opacity pointer-events-none">
+          <span className="font-comic text-[11px] tracking-wider font-bold text-slate-800 pointer-events-auto">
+            LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search • Fold notes or drag anywhere
+          </span>
+        </footer>
+
+        {/* --- Modals --- */}
+        {/* 1. Note Editor Modal */}
+        <NoteEditorModal
+          note={editingNote}
+          isOpen={isNoteModalOpen}
+          onClose={() => {
+            setIsNoteModalOpen(false);
+            setEditingNote(null);
+          }}
+          onSave={handleSaveNote}
+          onDelete={handleDeleteNote}
+        />
+
+        {/* 2. Shortcut Add/Edit Modal */}
+        <ShortcutModal
+          bookmark={editingBookmark}
+          isOpen={isBookmarkModalOpen}
+          onClose={() => {
+            setIsBookmarkModalOpen(false);
+            setEditingBookmark(null);
+          }}
+          onSave={handleSaveBookmark}
+          onDelete={handleDeleteBookmark}
+        />
+
+        {/* 3. Settings & Cloud Sync Modal */}
+        <SettingsModal
+          settings={settings}
+          isOpen={isSettingsOpen}
+          user={user}
+          onClose={() => setIsSettingsOpen(false)}
+          onUpdateSettings={handleUpdateSettings}
+          onResetDefaults={handleResetDefaults}
+          onAuthSuccess={(u) => setUser(u)}
+          onLogout={() => {
+            setUser(null);
+            storage.setAuthTokens(null);
+            setSyncState('offline');
+          }}
+          onManualSync={handleManualSync}
+          syncState={syncState}
+        />
+
+  {/* 4. Pin New To-Do Sheet Modal */ }
+  <NewSheetModal
+    isOpen={isNewSheetModalOpen}
+    onClose={() => setIsNewSheetModalOpen(false)}
+    onCreateSheet={handleCreateTodoSheet}
+  />
+      </div >
+      );
 }

@@ -99,7 +99,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const activeProvider = SEARCH_PROVIDERS[provider] || SEARCH_PROVIDERS.google;
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-4 z-30 my-4">
+    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-4 z-40 my-4">
       {/* Decorative Masking Tape on Top of Search Panel */}
       <div className="masking-tape h-4 w-32 mx-auto -mb-2 rotate-[-1deg] opacity-90 rounded-sm z-10" />
 
@@ -192,7 +192,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
         {/* Autocomplete Suggestions Dropdown */}
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-2 bg-white border-2 border-slate-900 rounded-xl shadow-comicLg overflow-hidden z-40 py-1">
+          <div className="absolute left-0 right-0 top-full mt-2 bg-white border-2 border-slate-900 rounded-xl shadow-comicLg overflow-hidden z-50 py-1">
             {suggestions.map((suggestion, idx) => (
               <div
                 key={idx}
