@@ -52,11 +52,11 @@ export const TaskChecklist: React.FC<TaskChecklistProps> = ({
 }) => {
   return (
     <>
-      {sheets.map((sheet, index) => {
-        // Filter tasks for this specific sheet
-        const sheetTasks = tasks.filter(
-          (t) => t.category.toLowerCase() === sheet.category.toLowerCase()
-        );
+        {sheets.map((sheet, index) => {
+          // Filter tasks for this specific sheet
+          const sheetTasks = tasks.filter(
+            (t) => t.category.toLowerCase() === sheet.category.toLowerCase()
+          );
 
         return (
           <DraggableNotepadSheet
@@ -91,159 +91,158 @@ interface DraggableNotepadSheetProps {
   onDeleteSheet: (sheetId: string) => void;
 }
 
-const DraggableNotepadSheet: React.FC<DraggableNotepadSheetProps> = ({
-  sheet,
-  sheetIdx,
-  totalSheets,
-  tasks,
-  onToggleTask,
-  onAddTask,
-  onDeleteTask,
-  onUpdatePriority,
-  onDragEnd,
-  onDeleteSheet,
-}) => {
-  const [currentPos, setCurrentPos] = useState(sheet.position);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isInputOpen, setIsInputOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
+  const DraggableNotepadSheet: React.FC<DraggableNotepadSheetProps> = ({
+    sheet,
+    sheetIdx,
+    totalSheets,
+    tasks,
+    onToggleTask,
+    onAddTask,
+    onDeleteTask,
+    onUpdatePriority,
+    onDragEnd,
+    onDeleteSheet,
+  }) => {
+    const [currentPos, setCurrentPos] = useState(sheet.position);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isInputOpen, setIsInputOpen] = useState(false);
+    const [newTitle, setNewTitle] = useState('');
+    const [newPriority, setNewPriority] = useState<TaskPriority>('medium');
 
-  useEffect(() => {
+    useEffect(() => {
     setCurrentPos(sheet.position);
   }, [sheet.position.x, sheet.position.y, sheet.position.zIndex]);
 
-  const remainingCount = tasks.filter((t) => !t.completed).length;
-  const paperBg = PAPER_COLORS[sheet.paperColor] || PAPER_COLORS.yellow;
+const remainingCount = tasks.filter((t) => !t.completed).length;
+const paperBg = PAPER_COLORS[sheet.paperColor] || PAPER_COLORS.yellow;
 
-  // Pin Class
-  const pinClass =
-    sheet.pinType === 'yellow'
-      ? 'pushpin-yellow'
-      : sheet.pinType === 'blue'
+// Pin Class
+const pinClass =
+  sheet.pinType === 'yellow'
+    ? 'pushpin-yellow'
+    : sheet.pinType === 'blue'
       ? 'pushpin-blue'
       : 'pushpin-red';
 
-  // Dragging handler
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (
-      (e.target as HTMLElement).closest('button') ||
-      (e.target as HTMLElement).closest('input') ||
-      (e.target as HTMLElement).closest('svg') ||
+// Dragging handler
+const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  if (
+    (e.target as HTMLElement).closest('button') ||
+    (e.target as HTMLElement).closest('input') ||
+    (e.target as HTMLElement).closest('svg') ||
       (e.target as HTMLElement).closest('.task-item')
-    ) {
-      return;
-    }
+  ) {
+    return;
+  }
 
-    sounds.playPaperRustle();
-    setIsDragging(true);
+  sounds.playPaperRustle();
+  setIsDragging(true);
 
-    const startClientX = e.clientX;
-    const startClientY = e.clientY;
-    const startPosX = currentPos.x;
-    const startPosY = currentPos.y;
+  const startClientX = e.clientX;
+  const startClientY = e.clientY;
+  const startPosX = currentPos.x;
+  const startPosY = currentPos.y;
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const deltaX = moveEvent.clientX - startClientX;
-      const deltaY = moveEvent.clientY - startClientY;
-      setCurrentPos({
-        ...currentPos,
-        x: startPosX + deltaX,
-        y: startPosY + deltaY,
-      });
-    };
-
-    const handleMouseUp = (upEvent: MouseEvent) => {
-      setIsDragging(false);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-      const deltaX = upEvent.clientX - startClientX;
-      const deltaY = upEvent.clientY - startClientY;
-      onDragEnd(sheet.id, startPosX + deltaX, startPosY + deltaY);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleCreateTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim()) return;
-
-    sounds.playComicClick();
-    onAddTask({
-      title: newTitle.trim(),
-      description: '',
-      completed: false,
-      priority: newPriority,
-      category: sheet.category,
-      position: tasks.length,
-      dueDate: 'Today',
+  const handleMouseMove = (moveEvent: MouseEvent) => {
+    const deltaX = moveEvent.clientX - startClientX;
+    const deltaY = moveEvent.clientY - startClientY;
+    setCurrentPos({
+      ...currentPos,
+      x: startPosX + deltaX,
+      y: startPosY + deltaY,
     });
-
-    setNewTitle('');
-    setIsInputOpen(false);
   };
 
-  const handleToggle = (id: string, currentlyCompleted: boolean) => {
-    if (!currentlyCompleted) {
-      sounds.playCheckmark();
-      if (remainingCount === 1) {
-        confetti({
-          particleCount: 80,
-          spread: 60,
-          origin: { y: 0.7 },
-        });
-      }
-    } else {
-      sounds.playComicClick();
+  const handleMouseUp = (upEvent: MouseEvent) => {
+    setIsDragging(false);
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', handleMouseUp);
+    const deltaX = upEvent.clientX - startClientX;
+    const deltaY = upEvent.clientY - startClientY;
+    onDragEnd(sheet.id, startPosX + deltaX, startPosY + deltaY);
+  };
+
+  window.addEventListener('mousemove', handleMouseMove);
+  window.addEventListener('mouseup', handleMouseUp);
+};
+
+const handleCreateTask = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!newTitle.trim()) return;
+
+  sounds.playComicClick();
+  onAddTask({
+    title: newTitle.trim(),
+    description: '',
+    completed: false,
+    priority: newPriority,
+    category: sheet.category,
+    position: tasks.length,
+    dueDate: 'Today',
+  });
+
+  setNewTitle('');
+  setIsInputOpen(false);
+};
+
+const handleToggle = (id: string, currentlyCompleted: boolean) => {
+  if (!currentlyCompleted) {
+    sounds.playCheckmark();
+    if (remainingCount === 1) {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.7 },
+      });
     }
-    onToggleTask(id);
-  };
+  } else {
+    sounds.playComicClick();
+  }
+  onToggleTask(id);
+};
 
-  return (
-    <div
+return (
+    < div
       onMouseDown={handleMouseDown}
-      style={{
-        transform: `translate3d(${currentPos.x}px, ${currentPos.y}px, 0) rotate(${sheet.rotation || 0}deg)`,
-        zIndex: isDragging ? 80 : currentPos.zIndex || 15,
-        position: 'absolute',
-      }}
-      className={`w-80 sm:w-[340px] ${paperBg} border-2 border-slate-900 rounded-xl p-4 pt-6 paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${
-        isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-comic hover:shadow-comicLg'
+    style={{
+      transform: `translate3d(${currentPos.x}px, ${currentPos.y}px, 0) rotate(${sheet.rotation || 0}deg)`,
+      zIndex: isDragging ? 80 : currentPos.zIndex || 15,
+      position: 'absolute',
+    }}
+    className={`w-80 sm:w-[340px] ${paperBg} border-2 border-slate-900 rounded-xl p-4 pt-6 paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-comic hover:shadow-comicLg'
       }`}
-    >
-      {/* Pin or Tape Header Graphic */}
-      {sheet.pinType === 'tape' ? (
-        <div className="masking-tape h-3.5 w-24 mx-auto -mt-8 mb-4 opacity-90 rounded-xs" />
-      ) : (
-        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 pushpin ${pinClass}`} />
-      )}
+  >
+    {/* Pin or Tape Header Graphic */}
+    {sheet.pinType === 'tape' ? (
+      <div className="masking-tape h-3.5 w-24 mx-auto -mt-8 mb-4 opacity-90 rounded-xs" />
+    ) : (
+      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 pushpin ${pinClass}`} />
+    )}
 
-      {/* Sheet Header */}
-      <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-3">
-        <div className="pr-2">
-          <h3 className="font-comic text-lg text-slate-900 tracking-wider flex items-center gap-1.5 leading-tight truncate">
-            <span>📋</span>
-            <span className="truncate">{sheet.title}</span>
-          </h3>
-          <p className="font-handwritten text-xs font-bold text-slate-600">
-            {remainingCount === 0 ? '🎉 All caught up!' : `${remainingCount} task${remainingCount === 1 ? '' : 's'} remaining`}
-          </p>
-        </div>
+    {/* Sheet Header */}
+    <div className="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-3">
+      <div className="pr-2">
+        <h3 className="font-comic text-lg text-slate-900 tracking-wider flex items-center gap-1.5 leading-tight truncate">
+          <span>📋</span>
+          <span className="truncate">{sheet.title}</span>
+        </h3>
+        <p className="font-handwritten text-xs font-bold text-slate-600">
+          {remainingCount === 0 ? '🎉 All caught up!' : `${remainingCount} task${remainingCount === 1 ? '' : 's'} remaining`}
+        </p>
+      </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => {
-              sounds.playPaperRustle();
-              setIsInputOpen(!isInputOpen);
-            }}
-            title="Scribble a new task on this sheet"
-            className="comic-btn bg-desk-comicYellow text-slate-950 p-1.5 rounded-md text-xs font-bold"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-          </button>
+      {/* Action Controls */}
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => {
+            sounds.playPaperRustle();
+            setIsInputOpen(!isInputOpen);
+          }}
+          title="Scribble a new task on this sheet"
+          className="comic-btn bg-desk-comicYellow text-slate-950 p-1.5 rounded-md text-xs font-bold"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+        </button>
 
           {totalSheets > 1 && (
             <button
@@ -284,11 +283,10 @@ const DraggableNotepadSheet: React.FC<DraggableNotepadSheetProps> = ({
                   key={p}
                   type="button"
                   onClick={() => setNewPriority(p)}
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                    newPriority === p
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border ${newPriority === p
                       ? `${PRIORITY_STYLES[p].bg} ${PRIORITY_STYLES[p].text} border-slate-900`
                       : 'bg-white text-slate-600 border-slate-300'
-                  }`}
+                    }`}
                 >
                   {p[0]}
                 </button>
@@ -385,21 +383,21 @@ const DraggableNotepadSheet: React.FC<DraggableNotepadSheetProps> = ({
                   </button>
                 </div>
               </div>
-            );
+      );
           })
         )}
-      </div>
-
-      {/* Sheet Footer with subtle Drag Handle */}
-      <div className="mt-3 pt-2 border-t border-slate-900/10 flex items-center justify-between text-[10px] text-slate-400 font-comic">
-        <span className="flex items-center gap-1 text-slate-500">
-          <GripHorizontal className="w-3 h-3 text-slate-400" />
-          <span>Sheet {sheetIdx + 1} of {totalSheets} • Drag to move</span>
-        </span>
-        {tasks.length >= 4 && (
-          <span className="text-desk-comicRed font-bold">4 tasks</span>
-        )}
-      </div>
     </div>
+
+{/* Sheet Footer with subtle Drag Handle */ }
+<div className="mt-3 pt-2 border-t border-slate-900/10 flex items-center justify-between text-[10px] text-slate-400 font-comic">
+  <span className="flex items-center gap-1 text-slate-500">
+    <GripHorizontal className="w-3 h-3 text-slate-400" />
+    <span>Sheet {sheetIdx + 1} of {totalSheets} • Drag to move</span>
+  </span>
+  {tasks.length >= 4 && (
+    <span className="text-desk-comicRed font-bold">4 tasks</span>
+  )}
+</div>
+    </div >
   );
 };

@@ -12,14 +12,14 @@ interface PaperNoteCardProps {
   onDragEnd: (id: string, x: number, y: number) => void;
 }
 
-const COLOR_CLASSES: Record<NoteColor, { bg: string; border: string }> = {
-  yellow: { bg: 'bg-[#FEF9C3]', border: 'border-[#FACC15]' },
-  cream: { bg: 'bg-[#FAF3E0]', border: 'border-[#E2D5B5]' },
-  white: { bg: 'bg-[#FFFFFF]', border: 'border-slate-300' },
-  pink: { bg: 'bg-[#FFE4E6]', border: 'border-[#FDA4AF]' },
-  blue: { bg: 'bg-[#E0F2FE]', border: 'border-[#7DD3FC]' },
-  green: { bg: 'bg-[#DCFCE7]', border: 'border-[#86EFAC]' },
-  purple: { bg: 'bg-[#F3E8FF]', border: 'border-[#D8B4FE]' },
+const COLOR_CLASSES: Record<NoteColor, { bg: string; border: string; tape: string }> = {
+  yellow: { bg: 'bg-[#FEF9C3]', border: 'border-[#FACC15]', tape: 'bg-amber-200/80' },
+  cream: { bg: 'bg-[#FAF3E0]', border: 'border-[#E2D5B5]', tape: 'bg-stone-200/80' },
+  white: { bg: 'bg-[#FFFFFF]', border: 'border-slate-300', tape: 'bg-slate-200/80' },
+  pink: { bg: 'bg-[#FFE4E6]', border: 'border-[#FDA4AF]', tape: 'bg-rose-200/80' },
+  blue: { bg: 'bg-[#E0F2FE]', border: 'border-[#7DD3FC]', tape: 'bg-sky-200/80' },
+  green: { bg: 'bg-[#DCFCE7]', border: 'border-[#86EFAC]', tape: 'bg-emerald-200/80' },
+  purple: { bg: 'bg-[#F3E8FF]', border: 'border-[#D8B4FE]', tape: 'bg-purple-200/80' },
 };
 
 const COLOR_OPTIONS: NoteColor[] = ['yellow', 'cream', 'white', 'pink', 'blue', 'green', 'purple'];
@@ -72,9 +72,9 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-56 min-h-[160px]',
-    md: 'w-64 min-h-[200px]',
-    lg: 'w-76 min-h-[240px]',
+    sm: 'w-56 min-h-[140px]',
+    md: 'w-64 min-h-[160px]',
+    lg: 'w-76 min-h-[200px]',
   }[note.size || 'md'];
 
   return (
@@ -85,11 +85,11 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         zIndex: isDragging ? 100 : note.position.zIndex || 10,
         position: 'absolute',
       }}
-      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900 rounded-xl p-3.5 flex flex-col justify-between select-none cursor-grab active:cursor-grabbing transition-all duration-150 paper-curl-br ${
-        isDragging ? 'shadow-comicLg scale-[1.02]' : 'shadow-comic hover:shadow-comicLg'
+      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${
+        isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
       }`}
     >
-      {/* Pin or Tape Header Graphic — Overlay on top of card without affecting shadow */}
+      {/* Pin or Tape Attached Directly to the Top of the Paper Sheet */}
       {note.pinType === 'red' && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 pushpin pushpin-red pointer-events-none" />
       )}
@@ -100,13 +100,13 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 pushpin pushpin-blue pointer-events-none" />
       )}
       {note.pinType === 'tape-corner' && (
-        <div className="absolute -top-2.5 -left-2.5 masking-tape h-4 w-12 rotate-[-45deg] z-10 pointer-events-none" />
+        <div className="absolute -top-3 -left-3 masking-tape h-4 w-12 rotate-[-45deg] z-10 pointer-events-none" />
       )}
       {(!note.pinType || note.pinType === 'tape-top') && (
-        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 masking-tape h-3.5 w-20 opacity-90 rounded-xs pointer-events-none z-10" />
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 masking-tape h-4 w-24 opacity-90 rounded-xs pointer-events-none z-10" />
       )}
 
-      {/* Top: Title & Controls */}
+      {/* Top: Title & Pin/Edit Controls */}
       <div>
         <div className="flex items-start justify-between gap-2 border-b border-slate-900/15 pb-1.5 mb-2">
           <h3
@@ -147,7 +147,7 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         {/* Note Content */}
         <div
           onClick={() => onEdit(note)}
-          className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer font-bold"
+          className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer"
         >
           {note.content || 'Tap here to scribble thoughts...'}
         </div>

@@ -536,7 +536,7 @@ export default function App() {
       </main>
 
       {/* Subtle Footer Watermark */}
-      <footer className="w-full text-center py-2 z-0 select-none opacity-40 hover:opacity-100 transition-opacity pointer-events-none">
+      <footer className="w-full text-center py-2.5 z-10 select-none opacity-50 hover:opacity-100 transition-opacity">
         <span className="font-comic text-xs tracking-wider font-bold text-slate-800">
           LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search
         </span>
