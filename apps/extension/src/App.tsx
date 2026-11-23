@@ -328,19 +328,6 @@ export default function App() {
     storage.saveTodoSheets(updated);
   };
 
-  const handleFoldAll = () => {
-    const allCollapsed = todoSheets.every((s) => s.isCollapsed) && notes.every((n) => n.isCollapsed);
-    const target = !allCollapsed;
-
-    const newSheets = todoSheets.map((s) => ({ ...s, isCollapsed: target }));
-    const newNotes = notes.map((n) => ({ ...n, isCollapsed: target }));
-
-    setTodoSheets(newSheets);
-    setNotes(newNotes);
-    storage.saveTodoSheets(newSheets);
-    storage.saveNotes(newNotes);
-  };
-
   // --- Tasks Actions ---
   const handleToggleTask = (id: string) => {
     const newTasks = tasks.map((t) =>
@@ -541,65 +528,6 @@ export default function App() {
               setIsBookmarkModalOpen(true);
             }}
           />
-        </div>
-
-        {/* Wall Canvas Quick Action Toolbar: Fold/Unfold, Hide/Show Notes, Hide/Show To-Dos */}
-        <div className="w-full flex items-center justify-between px-2 py-1 text-xs select-none pointer-events-auto">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                sounds.playPaperRustle();
-                handleFoldAll();
-              }}
-              title="Fold or Unfold all items on desk"
-              className="px-2.5 py-1 bg-white/90 hover:bg-white border border-slate-900 rounded-md font-comic font-bold text-slate-800 shadow-xs flex items-center gap-1 transition-all"
-            >
-              <span>📁</span>
-              <span>Fold / Unfold All</span>
-            </button>
-
-            <button
-              onClick={() => {
-                sounds.playComicClick();
-                setShowTodos(!showTodos);
-              }}
-              className={`px-2.5 py-1 rounded-md font-comic font-bold border transition-all flex items-center gap-1 ${
-                showTodos
-                  ? 'bg-amber-100 border-slate-900 text-slate-900 shadow-xs'
-                  : 'bg-white/70 border-slate-300 text-slate-500 hover:bg-white'
-              }`}
-            >
-              <span>📋</span>
-              <span>To-Dos ({showTodos ? 'Shown' : 'Hidden'})</span>
-            </button>
-
-            <button
-              onClick={() => {
-                sounds.playComicClick();
-                setShowNotes(!showNotes);
-              }}
-              className={`px-2.5 py-1 rounded-md font-comic font-bold border transition-all flex items-center gap-1 ${
-                showNotes
-                  ? 'bg-amber-100 border-slate-900 text-slate-900 shadow-xs'
-                  : 'bg-white/70 border-slate-300 text-slate-500 hover:bg-white'
-              }`}
-            >
-              <span>📝</span>
-              <span>Notes ({showNotes ? 'Shown' : 'Hidden'})</span>
-            </button>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2">
-            <button
-              onClick={() => {
-                sounds.playPaperRustle();
-                setIsNewSheetModalOpen(true);
-              }}
-              className="text-xs font-comic font-bold text-slate-700 hover:text-slate-950 flex items-center gap-1 bg-white/80 hover:bg-white px-2.5 py-1 rounded-md border border-slate-900/30 shadow-xs"
-            >
-              <span>+ New To-Do Sheet</span>
-            </button>
-          </div>
         </div>
       </main>
 
