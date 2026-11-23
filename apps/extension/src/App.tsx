@@ -34,6 +34,7 @@ export default function App() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(DEFAULT_BOOKMARKS);
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_USER_SETTINGS);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [sheetPositions, setSheetPositions] = useState<Record<string, { x: number; y: number; zIndex: number }>>({});
   const [user, setUser] = useState<any>(null);
 
   // Sync state
@@ -61,6 +62,10 @@ export default function App() {
         setBookmarks(data.bookmarks || DEFAULT_BOOKMARKS);
         setSettings(data.settings || DEFAULT_USER_SETTINGS);
         setRecentSearches(data.recentSearches || []);
+
+        // Load saved sheet positions
+        const savedSheetPositions = await storage.getSheetPositions();
+        if (savedSheetPositions) setSheetPositions(savedSheetPositions);
 
         // Load saved user info
         const savedUser = await storage.getUserInfo();
@@ -244,6 +249,17 @@ export default function App() {
     );
     setNotes(newNotes);
     storage.saveNotes(newNotes);
+  };
+
+  const handleSheetDragEnd = (sheetKey: string, newX: number, newY: number) => {
+    setSheetPositions((prev) => {
+      const updated = {
+        ...prev,
+        [sheetKey]: { x: newX, y: newY, zIndex: 30 },
+      };
+      storage.saveSheetPositions(updated);
+      return updated;
+    });
   };
 
   // --- Tasks Actions ---
@@ -452,19 +468,18 @@ export default function App() {
           />
         </div>
 
-        {/* Interactive To-Do Checklist (Pinned Card on Wall) */}
-        <div className="gsap-pop mt-4 mb-20 w-full flex justify-center">
+        {/* Unified Freeform Scrapbook Wall: Draggable To-Do Sheets & Draggable Paper Notes */}
+        <div className="w-full relative min-h-[680px] my-3 pb-16">
           <TaskChecklist
             tasks={tasks}
+            sheetPositions={sheetPositions}
             onToggleTask={handleToggleTask}
             onAddTask={handleAddTask}
             onDeleteTask={handleDeleteTask}
             onUpdatePriority={handleUpdateTaskPriority}
+            onSheetDragEnd={handleSheetDragEnd}
           />
-        </div>
 
-        {/* Freeform Draggable Paper Notes Wall */}
-        <div className="w-full relative min-h-[450px]">
           {notes.map((note) => (
             <PaperNoteCard
               key={note.id}

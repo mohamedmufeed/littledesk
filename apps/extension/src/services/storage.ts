@@ -20,6 +20,7 @@ const STORAGE_KEYS = {
   REFRESH_TOKEN: 'littledesk_refresh_token',
   USER_INFO: 'littledesk_user_info',
   LAST_SYNC: 'littledesk_last_sync',
+  SHEET_POSITIONS: 'littledesk_sheet_positions',
 };
 
 // Check if running inside Chrome extension environment
@@ -143,6 +144,14 @@ class StorageService {
 
   async setLastSync(timestamp: string): Promise<void> {
     await this.setItem(STORAGE_KEYS.LAST_SYNC, timestamp);
+  }
+
+  async getSheetPositions(): Promise<Record<string, { x: number; y: number; zIndex: number }>> {
+    return this.getItem(STORAGE_KEYS.SHEET_POSITIONS, {});
+  }
+
+  async saveSheetPositions(positions: Record<string, { x: number; y: number; zIndex: number }>): Promise<void> {
+    await this.setItem(STORAGE_KEYS.SHEET_POSITIONS, positions);
   }
 }
 

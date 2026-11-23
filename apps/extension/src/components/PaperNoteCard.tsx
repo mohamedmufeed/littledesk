@@ -46,23 +46,25 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
 
     sounds.playPaperRustle();
     setIsDragging(true);
-    setDragOffset({
-      x: e.clientX - currentPos.x,
-      y: e.clientY - currentPos.y,
-    });
+    const startClientX = e.clientX;
+    const startClientY = e.clientY;
+    const startPosX = currentPos.x;
+    const startPosY = currentPos.y;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const newX = Math.max(10, Math.min(window.innerWidth - 300, moveEvent.clientX - dragOffset.x));
-      const newY = Math.max(10, Math.min(window.innerHeight - 250, moveEvent.clientY - dragOffset.y));
-      setCurrentPos({ x: newX, y: newY });
+      const deltaX = moveEvent.clientX - startClientX;
+      const deltaY = moveEvent.clientY - startClientY;
+      setCurrentPos({ x: startPosX + deltaX, y: startPosY + deltaY });
     };
 
     const handleMouseUp = (upEvent: MouseEvent) => {
       setIsDragging(false);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      const finalX = Math.max(10, Math.min(window.innerWidth - 300, upEvent.clientX - dragOffset.x));
-      const finalY = Math.max(10, Math.min(window.innerHeight - 250, upEvent.clientY - dragOffset.y));
+      const deltaX = upEvent.clientX - startClientX;
+      const deltaY = upEvent.clientY - startClientY;
+      const finalX = startPosX + deltaX;
+      const finalY = startPosY + deltaY;
       onDragEnd(note.id, finalX, finalY);
     };
 
@@ -84,9 +86,8 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         zIndex: isDragging ? 100 : note.position.zIndex || 10,
         position: 'absolute',
       }}
-      className={`group ${sizeClasses} select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${
-        isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
-      }`}
+      className={`group ${sizeClasses} select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
+        }`}
     >
       {/* Pin or Tape Header Graphic */}
       {note.pinType === 'red' && (
@@ -127,9 +128,8 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                   onTogglePin(note.id);
                 }}
                 title={note.isPinned ? 'Unpin' : 'Pin to top'}
-                className={`p-1 rounded hover:bg-black/5 ${
-                  note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
-                }`}
+                className={`p-1 rounded hover:bg-black/5 ${note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
+                  }`}
               >
                 <Pin className="w-3.5 h-3.5" />
               </button>
@@ -168,9 +168,8 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                   sounds.playComicClick();
                   onColorChange(note.id, c);
                 }}
-                className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${
-                  note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
-                }`}
+                className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
+                  }`}
                 style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
               />
             ))}
