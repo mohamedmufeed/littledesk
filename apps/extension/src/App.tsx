@@ -256,9 +256,9 @@ export default function App() {
     const updated = todoSheets.map((s) =>
       s.id === sheetId
         ? {
-            ...s,
-            position: { ...s.position, x: newX, y: newY, zIndex: 30 },
-          }
+          ...s,
+          position: { ...s.position, x: newX, y: newY, zIndex: 30 },
+        }
         : s
     );
     setTodoSheets(updated);
@@ -504,39 +504,39 @@ export default function App() {
           />
         </div>
 
-          {/* Unified Freeform Scrapbook Wall: Draggable To-Do Sheets & Draggable Paper Notes */}
-          <div className="w-full relative min-h-[680px] my-3 pb-16">
-            <TaskChecklist
-              sheets={todoSheets}
-              tasks={tasks}
-              onToggleTask={handleToggleTask}
-              onAddTask={handleAddTask}
-              onDeleteTask={handleDeleteTask}
-              onUpdatePriority={handleUpdateTaskPriority}
-              onSheetDragEnd={handleSheetDragEnd}
-              onDeleteSheet={handleDeleteTodoSheet}
-              onOpenNewSheetModal={() => setIsNewSheetModalOpen(true)}
-            />
+        {/* Unified Freeform Scrapbook Wall: Draggable To-Do Sheets & Draggable Paper Notes */}
+        <div className="w-full relative min-h-[680px] my-3 pb-16">
+          <TaskChecklist
+            sheets={todoSheets}
+            tasks={tasks}
+            onToggleTask={handleToggleTask}
+            onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
+            onUpdatePriority={handleUpdateTaskPriority}
+            onSheetDragEnd={handleSheetDragEnd}
+            onDeleteSheet={handleDeleteTodoSheet}
+            onOpenNewSheetModal={() => setIsNewSheetModalOpen(true)}
+          />
 
-            {notes.map((note) => (
-              <PaperNoteCard
-                key={note.id}
-                note={note}
-                onEdit={(n) => {
-                  setEditingNote(n);
-                  setIsNoteModalOpen(true);
-                }}
-                onDelete={handleDeleteNote}
-                onTogglePin={handleToggleNotePin}
-                onColorChange={handleNoteColorChange}
-                onDragEnd={handleNoteDragEnd}
-              />
-            ))}
-          </div>
+          {notes.map((note) => (
+            <PaperNoteCard
+              key={note.id}
+              note={note}
+              onEdit={(n) => {
+                setEditingNote(n);
+                setIsNoteModalOpen(true);
+              }}
+              onDelete={handleDeleteNote}
+              onTogglePin={handleToggleNotePin}
+              onColorChange={handleNoteColorChange}
+              onDragEnd={handleNoteDragEnd}
+            />
+          ))}
+        </div>
       </main>
 
       {/* Subtle Footer Watermark */}
-      <footer className="w-full text-center py-2.5 z-10 select-none opacity-50 hover:opacity-100 transition-opacity">
+      <footer className="w-full text-center py-2 z-0 select-none opacity-40 hover:opacity-100 transition-opacity pointer-events-none">
         <span className="font-comic text-xs tracking-wider font-bold text-slate-800">
           LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search
         </span>
