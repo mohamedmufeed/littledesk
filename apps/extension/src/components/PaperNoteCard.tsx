@@ -85,9 +85,8 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         zIndex: isDragging ? 100 : note.position.zIndex || 10,
         position: 'absolute',
       }}
-      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${
-        isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
-      }`}
+      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing transition-shadow duration-150 ${isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
+        }`}
     >
       {/* Pin or Tape Attached Directly to the Top of the Paper Sheet */}
       {note.pinType === 'red' && (
@@ -106,85 +105,83 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 masking-tape h-4 w-24 opacity-90 rounded-xs pointer-events-none z-10" />
       )}
 
-      {/* Top: Title & Pin/Edit Controls */}
+            {/* Top: Title & Pin/Edit Controls */}
       <div>
-        <div className="flex items-start justify-between gap-2 border-b border-slate-900/15 pb-1.5 mb-2">
-          <h3
-            onClick={() => onEdit(note)}
-            className="font-comic text-base text-slate-900 tracking-wide font-bold line-clamp-1 hover:text-desk-comicRed cursor-pointer"
-          >
-            {note.title || 'Untitled Note'}
-          </h3>
+            <div className="flex items-start justify-between gap-2 border-b border-slate-900/15 pb-1.5 mb-2">
+              <h3
+                onClick={() => onEdit(note)}
+                className="font-comic text-base text-slate-900 tracking-wide font-bold line-clamp-1 hover:text-desk-comicRed cursor-pointer"
+              >
+                {note.title || 'Untitled Note'}
+              </h3>
 
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                sounds.playComicClick();
-                onTogglePin(note.id);
-              }}
-              title={note.isPinned ? 'Unpin' : 'Pin to top'}
-              className={`p-1 rounded hover:bg-black/5 ${
-                note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
-              }`}
-            >
-              <Pin className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                sounds.playPaperRustle();
-                onEdit(note);
-              }}
-              title="Edit note"
-              className="p-1 rounded hover:bg-black/5 text-slate-600"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-            </button>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sounds.playComicClick();
+                    onTogglePin(note.id);
+                  }}
+                  title={note.isPinned ? 'Unpin' : 'Pin to top'}
+                  className={`p-1 rounded hover:bg-black/5 ${note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
+                    }`}
+                >
+                  <Pin className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sounds.playPaperRustle();
+                    onEdit(note);
+                  }}
+                  title="Edit note"
+                  className="p-1 rounded hover:bg-black/5 text-slate-600"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+              {/* Note Content */}
+              <div
+                onClick={() => onEdit(note)}
+                className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer"
+              >
+                {note.content || 'Tap here to scribble thoughts...'}
+              </div>
+            </div>
+
+            {/* Footer: Color Switcher & Delete Button */}
+            <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-900/10">
+              {/* Quick Color Switcher */}
+              <div className="flex items-center gap-1">
+                {COLOR_OPTIONS.map((c) => (
+                  <button
+                    key={c}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      sounds.playComicClick();
+                      onColorChange(note.id, c);
+                    }}
+                    className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
+                      }`}
+                    style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sounds.playComicClick();
+                  onDelete(note.id);
+                }}
+                title="Delete note"
+                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
-        </div>
-
-        {/* Note Content */}
-        <div
-          onClick={() => onEdit(note)}
-          className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer"
-        >
-          {note.content || 'Tap here to scribble thoughts...'}
-        </div>
-      </div>
-
-      {/* Footer: Color Switcher & Delete Button */}
-      <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-900/10">
-        {/* Quick Color Switcher */}
-        <div className="flex items-center gap-1">
-          {COLOR_OPTIONS.map((c) => (
-            <button
-              key={c}
-              onClick={(e) => {
-                e.stopPropagation();
-                sounds.playComicClick();
-                onColorChange(note.id, c);
-              }}
-              className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${
-                note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
-              }`}
-              style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
-            />
-          ))}
-        </div>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            sounds.playComicClick();
-            onDelete(note.id);
-          }}
-          title="Delete note"
-          className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </div>
-    </div>
-  );
+          );
 };
