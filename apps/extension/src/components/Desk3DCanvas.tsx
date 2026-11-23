@@ -2,15 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
 interface Desk3DCanvasProps {
-  mouseX: number;
-  mouseY: number;
+  mouseX?: number;
+  mouseY?: number;
   sensitivity?: number;
   enabled?: boolean;
 }
 
 export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
-  mouseX,
-  mouseY,
   sensitivity = 0.5,
   enabled = true,
 }) => {
@@ -20,6 +18,7 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const deskObjectsRef = useRef<THREE.Group | null>(null);
   const animFrameIdRef = useRef<number | null>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (!enabled || !mountRef.current) return;
@@ -118,7 +117,14 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
     };
     window.addEventListener('resize', handleResize);
 
-    // Animation Loop with gentle idle sway
+    // Window mouse tracker for smooth parallax without React re-renders
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseRef.current.y = (e.clientY / window.innerHeight) * 2 - 1;
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    // Animation Loop with gentle idle sway and smooth mouse lerp
     let clock = new THREE.Clock();
     const animate = () => {
       animFrameIdRef.current = requestAnimationFrame(animate);
@@ -130,12 +136,21 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
 
       sticky3d.rotation.z = -0.15 + Math.sin(elapsedTime * 0.8) * 0.03;
 
+      // Smooth mouse parallax lerp on 3D group
+      if (deskObjectsRef.current) {
+        const targetRotX = mouseRef.current.y * sensitivity * 0.15;
+        const targetRotY = mouseRef.current.x * sensitivity * 0.15;
+        deskObjectsRef.current.rotation.x += (targetRotX - deskObjectsRef.current.rotation.x) * 0.08;
+        deskObjectsRef.current.rotation.y += (targetRotY - deskObjectsRef.current.rotation.y) * 0.08;
+      }
+
       renderer.render(scene, camera);
     };
     animate();
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
       if (renderer.domElement && mountRef.current) {
         mountRef.current.removeChild(renderer.domElement);
@@ -148,17 +163,7 @@ export const Desk3DCanvas: React.FC<Desk3DCanvasProps> = ({
       pinHeadGeo.dispose();
       pinMat.dispose();
     };
-  }, [enabled]);
-
-  // Handle subtle mouse parallax on Three.js group
-  useEffect(() => {
-    if (!deskObjectsRef.current || !enabled) return;
-    const targetRotX = mouseY * sensitivity * 0.15;
-    const targetRotY = mouseX * sensitivity * 0.15;
-
-    deskObjectsRef.current.rotation.x = targetRotX;
-    deskObjectsRef.current.rotation.y = targetRotY;
-  }, [mouseX, mouseY, sensitivity, enabled]);
+  }, [enabled, sensitivity]);
 
   if (!enabled) return null;
 

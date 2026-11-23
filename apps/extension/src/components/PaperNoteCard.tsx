@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, Edit3, Pin, Trash2 } from 'lucide-react';
 import { Note, NoteColor } from '@littledesk/shared';
 import { sounds } from '../utils/sound.js';
@@ -34,8 +34,15 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
   onToggleCollapse,
   onDragEnd,
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [currentPos, setCurrentPos] = useState({ x: note.position.x, y: note.position.y });
+  const posRef = useRef({ x: note.position.x, y: note.position.y });
+
+  useEffect(() => {
+    posRef.current = { x: note.position.x, y: note.position.y };
+    setCurrentPos({ x: note.position.x, y: note.position.y });
+  }, [note.position.x, note.position.y]);
 
   const colorConfig = COLOR_CLASSES[note.color] || COLOR_CLASSES.yellow;
 
@@ -47,31 +54,36 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
 
     sounds.playPaperRustle();
     setIsDragging(true);
+
     const startClientX = e.clientX;
     const startClientY = e.clientY;
-    const startPosX = currentPos.x;
-    const startPosY = currentPos.y;
+    const startPosX = posRef.current.x;
+    const startPosY = posRef.current.y;
+    let latestX = startPosX;
+    let latestY = startPosY;
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startClientX;
       const deltaY = moveEvent.clientY - startClientY;
-      const newX = Math.max(10, Math.min(window.innerWidth - 240, startPosX + deltaX));
-      const newY = Math.max(10, Math.min(window.innerHeight - 120, startPosY + deltaY));
-      setCurrentPos({ x: newX, y: newY });
+      latestX = Math.max(10, Math.min(window.innerWidth - 240, startPosX + deltaX));
+      latestY = Math.max(65, Math.min(window.innerHeight - 100, startPosY + deltaY));
+
+      // Direct hardware-accelerated transform: 0ms delay, zero React re-renders during drag!
+      if (cardRef.current) {
+        cardRef.current.style.transform = `translate3d(${latestX}px, ${latestY}px, 0) rotate(${note.rotation || 0}deg)`;
+      }
     };
 
-    const handleMouseUp = (upEvent: MouseEvent) => {
+    const handleMouseUp = () => {
       setIsDragging(false);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      const deltaX = upEvent.clientX - startClientX;
-      const deltaY = upEvent.clientY - startClientY;
-      const finalX = Math.max(10, Math.min(window.innerWidth - 240, startPosX + deltaX));
-      const finalY = Math.max(10, Math.min(window.innerHeight - 120, startPosY + deltaY));
-      onDragEnd(note.id, finalX, finalY);
+      posRef.current = { x: latestX, y: latestY };
+      setCurrentPos({ x: latestX, y: latestY });
+      onDragEnd(note.id, latestX, latestY);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseup', handleMouseUp);
   };
 
@@ -87,14 +99,18 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
 
   return (
     <div
+      ref={cardRef}
       onMouseDown={handleMouseDown}
       style={{
         transform: `translate3d(${currentPos.x}px, ${currentPos.y}px, 0) rotate(${note.rotation || 0}deg)`,
-        zIndex: isDragging ? 100 : note.position.zIndex || 10,
+        zIndex: isDragging ? 80 : note.position.zIndex || 15,
         position: 'absolute',
       }}
-      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing transition-all duration-150 ${isDragging ? 'shadow-paperDrag scale-[1.02]' : 'shadow-paper hover:shadow-paperHover'
-        }`}
+      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing pointer-events-auto ${
+        isDragging
+          ? 'shadow-paperDrag scale-[1.02] transition-none'
+          : 'shadow-paper hover:shadow-paperHover transition-shadow duration-150'
+      }`}
     >
       {/* Pin or Tape Header */}
       {note.pinType === 'red' && (
@@ -115,100 +131,100 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
 
       {/* Top: Title & Controls */}
       <div>
-          <div className="flex items-center justify-between gap-1.5 border-b border-slate-900/15 pb-1 mb-1">
-            <h3
-              onClick={() => onEdit(note)}
-              className="font-comic text-sm sm:text-base text-slate-900 tracking-wide font-bold line-clamp-1 hover:text-desk-comicRed cursor-pointer flex-1"
-            >
-              {note.title || 'Untitled Note'}
-            </h3>
+        <div className="flex items-center justify-between gap-1.5 border-b border-slate-900/15 pb-1 mb-1">
+          <h3
+            onClick={() => onEdit(note)}
+            className="font-comic text-sm sm:text-base text-slate-900 tracking-wide font-bold line-clamp-1 hover:text-desk-comicRed cursor-pointer flex-1"
+          >
+            {note.title || 'Untitled Note'}
+          </h3>
 
-              <div className="flex items-center gap-0.5">
-                {/* Collapse / Expand Toggle Button */}
+          <div className="flex items-center gap-0.5">
+            {/* Collapse / Expand Toggle Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                sounds.playPaperRustle();
+                onToggleCollapse?.(note.id);
+              }}
+              title={isCollapsed ? 'Unfold note' : 'Fold note'}
+              className="p-1 rounded hover:bg-black/5 text-slate-600"
+            >
+              {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            </button>
+
+            {!isCollapsed && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sounds.playComicClick();
+                    onTogglePin(note.id);
+                  }}
+                  title={note.isPinned ? 'Unpin' : 'Pin to top'}
+                  className={`p-1 rounded hover:bg-black/5 ${note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
+                    }`}
+                >
+                  <Pin className="w-3.5 h-3.5" />
+                </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     sounds.playPaperRustle();
-                    onToggleCollapse?.(note.id);
+                    onEdit(note);
                   }}
-                  title={isCollapsed ? 'Unfold note' : 'Fold note'}
+                  title="Edit note"
                   className="p-1 rounded hover:bg-black/5 text-slate-600"
                 >
-                  {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+                  <Edit3 className="w-3.5 h-3.5" />
                 </button>
-
-                {!isCollapsed && (
-                  <>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        sounds.playComicClick();
-                        onTogglePin(note.id);
-                      }}
-                      title={note.isPinned ? 'Unpin' : 'Pin to top'}
-                      className={`p-1 rounded hover:bg-black/5 ${note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
-                        }`}
-                    >
-                      <Pin className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        sounds.playPaperRustle();
-                        onEdit(note);
-                      }}
-                      title="Edit note"
-                      className="p-1 rounded hover:bg-black/5 text-slate-600"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-            </>
+              </>
             )}
           </div>
         </div>
 
-      {/* Note Content (Only shown when not collapsed) */}
-      {!isCollapsed && (
-        <div
-          onClick={() => onEdit(note)}
-          className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer mt-1"
-        >
-          {note.content || 'Tap here to scribble thoughts...'}
-        </div>
-      )}
-    </div>
-
-    {/* Footer: Color Switcher & Delete Button (Only shown when not collapsed) */}
-    {!isCollapsed && (
-      <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-900/10">
-        <div className="flex items-center gap-1">
-          {COLOR_OPTIONS.map((c) => (
-            <button
-              key={c}
-              onClick={(e) => {
-                e.stopPropagation();
-                sounds.playComicClick();
-                onColorChange(note.id, c);
-              }}
-        className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
-          }`}
-        style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
-              />
-            ))}
+        {/* Note Content (Only shown when not collapsed) */}
+        {!isCollapsed && (
+          <div
+            onClick={() => onEdit(note)}
+            className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer mt-1"
+          >
+            {note.content || 'Tap here to scribble thoughts...'}
+          </div>
+        )}
       </div>
 
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        sounds.playComicClick();
-        onDelete(note.id);
-      }}
-      title="Delete note"
-      className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
-    >
-      <Trash2 className="w-3.5 h-3.5" />
-    </button>
-  </div>
+      {/* Footer: Color Switcher & Delete Button (Only shown when not collapsed) */}
+      {!isCollapsed && (
+        <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-900/10">
+          <div className="flex items-center gap-1">
+            {COLOR_OPTIONS.map((c) => (
+              <button
+                key={c}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sounds.playComicClick();
+                  onColorChange(note.id, c);
+                }}
+                className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
+                  }`}
+                style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              sounds.playComicClick();
+              onDelete(note.id);
+            }}
+            title="Delete note"
+            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       )}
     </div >
   );

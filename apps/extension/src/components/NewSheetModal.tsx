@@ -124,9 +124,8 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
                   type="button"
                   onClick={() => setPaperColor(c.id)}
                   title={c.label}
-                  className={`w-6 h-6 rounded-full border-2 border-slate-900 transition-transform ${
-                    paperColor === c.id ? 'scale-125 ring-2 ring-slate-900' : 'hover:scale-110'
-                  }`}
+                  className={`w-6 h-6 rounded-full border-2 border-slate-900 transition-transform ${paperColor === c.id ? 'scale-125 ring-2 ring-slate-900' : 'hover:scale-110'
+                    }`}
                   style={{ backgroundColor: c.hex }}
                 />
               ))}
@@ -149,11 +148,10 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
                   key={pin.id}
                   type="button"
                   onClick={() => setPinType(pin.id as any)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${
-                    pinType === pin.id
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${pinType === pin.id
                       ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                       : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   {pin.label}
                 </button>

@@ -1,37 +1,74 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface DecorativeCollageProps {
-  mouseX: number;
-  mouseY: number;
+  mouseX?: number;
+  mouseY?: number;
   sensitivity?: number;
   visible?: boolean;
 }
 
 export const DecorativeCollage: React.FC<DecorativeCollageProps> = ({
-  mouseX,
-  mouseY,
   sensitivity = 0.5,
   visible = true,
 }) => {
-  if (!visible) return null;
+  const ref1 = useRef<HTMLDivElement>(null);
+  const ref2 = useRef<HTMLDivElement>(null);
+  const ref3 = useRef<HTMLDivElement>(null);
+  const ref4 = useRef<HTMLDivElement>(null);
 
-  // Calculate gentle parallax offsets
-  const factor = sensitivity * 14;
-  const offsetX1 = mouseX * factor * 0.6;
-  const offsetY1 = mouseY * factor * 0.6;
-  const offsetX2 = -mouseX * factor * 0.9;
-  const offsetY2 = -mouseY * factor * 0.9;
-  const offsetX3 = mouseX * factor * 1.2;
-  const offsetY3 = mouseY * factor * 1.2;
+  useEffect(() => {
+    if (!visible) return;
+
+    let rafId: number;
+    let targetX = 0;
+    let targetY = 0;
+    let curX = 0;
+    let curY = 0;
+
+    const onMouseMove = (e: MouseEvent) => {
+      targetX = (e.clientX / window.innerWidth) * 2 - 1;
+      targetY = (e.clientY / window.innerHeight) * 2 - 1;
+    };
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+    const factor = sensitivity * 14;
+
+    const loop = () => {
+      // Smooth lerp
+      curX += (targetX - curX) * 0.08;
+      curY += (targetY - curY) * 0.08;
+
+      const offsetX1 = curX * factor * 0.6;
+      const offsetY1 = curY * factor * 0.6;
+      const offsetX2 = -curX * factor * 0.9;
+      const offsetY2 = -curY * factor * 0.9;
+      const offsetX3 = curX * factor * 1.2;
+      const offsetY3 = curY * factor * 1.2;
+
+      if (ref1.current) ref1.current.style.transform = `translate3d(${offsetX1}px, ${offsetY1}px, 0) rotate(5deg)`;
+      if (ref2.current) ref2.current.style.transform = `translate3d(${offsetX2}px, ${offsetY2}px, 0) rotate(-6deg)`;
+      if (ref3.current) ref3.current.style.transform = `translate3d(${offsetX3}px, ${offsetY3}px, 0) rotate(12deg)`;
+      if (ref4.current) ref4.current.style.transform = `translate3d(${offsetX2}px, ${offsetY2}px, 0) rotate(-4deg)`;
+
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      cancelAnimationFrame(rafId);
+    };
+  }, [visible, sensitivity]);
+
+  if (!visible) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden select-none z-0">
       {/* 1. Top Right Comic Speech Bubble Sticker */}
       <div
-        className="absolute top-24 right-12 transition-transform duration-300 ease-out hidden xl:block"
-        style={{
-          transform: `translate3d(${offsetX1}px, ${offsetY1}px, 0) rotate(5deg)`,
-        }}
+        ref={ref1}
+        className="absolute top-24 right-12 hidden xl:block"
+        style={{ transform: 'translate3d(0, 0, 0) rotate(5deg)' }}
       >
         <div className="relative bg-white border-2 border-slate-900 rounded-2xl px-5 py-3 shadow-comic max-w-[210px]">
           <div className="font-comic text-desk-comicRed text-lg tracking-wider font-bold uppercase leading-none">
@@ -47,10 +84,9 @@ export const DecorativeCollage: React.FC<DecorativeCollageProps> = ({
 
       {/* 2. Top Left Polaroid Photo */}
       <div
-        className="absolute top-28 left-8 transition-transform duration-300 ease-out hidden lg:block"
-        style={{
-          transform: `translate3d(${offsetX2}px, ${offsetY2}px, 0) rotate(-6deg)`,
-        }}
+        ref={ref2}
+        className="absolute top-28 left-8 hidden lg:block"
+        style={{ transform: 'translate3d(0, 0, 0) rotate(-6deg)' }}
       >
         <div className="bg-white p-2.5 pb-6 border border-slate-800/20 shadow-paperHover rounded-sm w-44">
           {/* Masking tape on polaroid top */}
@@ -71,10 +107,9 @@ export const DecorativeCollage: React.FC<DecorativeCollageProps> = ({
 
       {/* 3. Bottom Left Coffee Ring & Stationery Doodle */}
       <div
-        className="absolute bottom-16 left-14 transition-transform duration-300 ease-out opacity-75 hidden md:block"
-        style={{
-          transform: `translate3d(${offsetX3}px, ${offsetY3}px, 0) rotate(12deg)`,
-        }}
+        ref={ref3}
+        className="absolute bottom-16 left-14 opacity-75 hidden md:block"
+        style={{ transform: 'translate3d(0, 0, 0) rotate(12deg)' }}
       >
         {/* Coffee cup stain SVG */}
         <div className="relative w-28 h-28">
@@ -95,10 +130,9 @@ export const DecorativeCollage: React.FC<DecorativeCollageProps> = ({
 
       {/* 4. Bottom Right Colorful Comic Badge / Stamp */}
       <div
-        className="absolute bottom-12 right-16 transition-transform duration-300 ease-out hidden lg:block"
-        style={{
-          transform: `translate3d(${offsetX2}px, ${offsetY2}px, 0) rotate(-4deg)`,
-        }}
+        ref={ref4}
+        className="absolute bottom-12 right-16 hidden lg:block"
+        style={{ transform: 'translate3d(0, 0, 0) rotate(-4deg)' }}
       >
         <div className="bg-desk-comicYellow border-2 border-slate-900 rounded-full w-24 h-24 p-1 shadow-comic flex flex-col items-center justify-center text-center">
           <span className="text-xl">🚀</span>

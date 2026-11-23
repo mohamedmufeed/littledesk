@@ -47,9 +47,6 @@ export default function App() {
   // Sync state
   const [syncState, setSyncState] = useState<'synced' | 'syncing' | 'offline' | 'error'>('synced');
 
-  // Mouse Parallax coordinates (-1 to 1)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
   // Modals state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isNewSheetModalOpen, setIsNewSheetModalOpen] = useState(false);
@@ -65,9 +62,31 @@ export default function App() {
     async function initWorkspace() {
       try {
         const data = await storage.loadWorkspace();
-        setNotes(data.notes || DEFAULT_NOTES);
+
+        // Migrate any positions from previous sub-container layout if y < 70
+        const migratedNotes = (data.notes || DEFAULT_NOTES).map((n) => {
+          if (n.position.y < 70) {
+            return {
+              ...n,
+              position: { ...n.position, y: Math.max(80, n.position.y + 220) },
+            };
+          }
+          return n;
+        });
+
+        const migratedSheets = (data.sheets || DEFAULT_TODO_SHEETS).map((s) => {
+          if (s.position.y < 70) {
+            return {
+              ...s,
+              position: { ...s.position, y: Math.max(80, s.position.y + 220) },
+            };
+          }
+          return s;
+        });
+
+        setNotes(migratedNotes);
         setTasks(data.tasks || DEFAULT_TASKS);
-        setTodoSheets(data.sheets || DEFAULT_TODO_SHEETS);
+        setTodoSheets(migratedSheets);
         setBookmarks(data.bookmarks || DEFAULT_BOOKMARKS);
         setSettings(data.settings || DEFAULT_USER_SETTINGS);
         setRecentSearches(data.recentSearches || []);
@@ -114,14 +133,6 @@ export default function App() {
 
     return () => ctx.revert();
   }, [settings.reducedMotion]);
-
-  // 3. Mouse Movement Parallax Tracker
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (settings.reducedMotion) return;
-    const normX = (e.clientX / window.innerWidth) * 2 - 1;
-    const normY = (e.clientY / window.innerHeight) * 2 - 1;
-    setMousePos({ x: normX, y: normY });
-  };
 
   // --- Background Sync Engine ---
   const attemptBackgroundSync = async (
@@ -471,7 +482,6 @@ export default function App() {
   return (
     <div
       ref={deskRef}
-      onMouseMove={handleMouseMove}
       className={`h-screen max-h-screen w-full relative overflow-hidden flex flex-col justify-between transition-colors duration-300 select-none ${activeThemeClass}`}
     >
       {/* Halftone texture overlay */}
@@ -479,22 +489,18 @@ export default function App() {
 
       {/* Decorative comic artwork (stickers, polaroids, HB pencil, coffee stain) */}
       <DecorativeCollage
-        mouseX={mousePos.x}
-        mouseY={mousePos.y}
         sensitivity={settings.parallaxSensitivity ?? 0.5}
         visible={settings.workspaceSettings?.showDecorativeElements !== false}
       />
 
       {/* Three.js 3D depth canvas with origami paper plane & sticky note */}
       <Desk3DCanvas
-        mouseX={mousePos.x}
-        mouseY={mousePos.y}
         sensitivity={settings.parallaxSensitivity ?? 0.5}
         enabled={!settings.reducedMotion && settings.workspaceSettings?.deskItemsVisible !== false}
       />
 
       {/* Top Header */}
-      <div className="gsap-fade-in z-20">
+      <div className="gsap-fade-in z-30 relative">
         <Header
           settings={settings}
           syncState={syncState}
@@ -507,50 +513,50 @@ export default function App() {
         />
       </div>
 
-        {/* Main Workspace Area: Search + Shortcuts + Canvas (Full screen desk, zero scroll!) */}
-        <main className="relative flex-1 w-full px-4 sm:px-8 z-10 flex flex-col overflow-hidden">
-          {/* Prominent Search Bar */}
-            <div className="gsap-fade-in w-full my-0.5">
-              <SearchBar
-                provider={settings.searchProvider}
-                recentSearches={recentSearches}
-                onProviderChange={handleProviderChange}
-                onAddRecentSearch={handleAddRecentSearch}
-                onClearRecentSearches={handleClearRecentSearches}
-              />
-            </div>
+      {/* Main Controls: Search + Shortcuts + Toolbar */}
+      <main className="relative z-20 w-full px-4 sm:px-8 flex flex-col pointer-events-none">
+        {/* Prominent Search Bar */}
+        <div className="gsap-fade-in w-full my-0.5 pointer-events-auto">
+          <SearchBar
+            provider={settings.searchProvider}
+            recentSearches={recentSearches}
+            onProviderChange={handleProviderChange}
+            onAddRecentSearch={handleAddRecentSearch}
+            onClearRecentSearches={handleClearRecentSearches}
+          />
+        </div>
 
-            {/* Website Shortcuts Launchpad */}
-              <div className="gsap-pop w-full my-0.5">
-                <ShortcutsGrid
-                  bookmarks={bookmarks}
-                  onOpenBookmark={handleOpenBookmark}
-                  onEditBookmark={(bm) => {
-                    setEditingBookmark(bm);
-                    setIsBookmarkModalOpen(true);
-                  }}
-                  onDeleteBookmark={handleDeleteBookmark}
-                  onAddBookmark={() => {
-                    setEditingBookmark(null);
-                    setIsBookmarkModalOpen(true);
-                  }}
-                />
-              </div>
+        {/* Website Shortcuts Launchpad */}
+        <div className="gsap-pop w-full my-0.5 pointer-events-auto">
+          <ShortcutsGrid
+            bookmarks={bookmarks}
+            onOpenBookmark={handleOpenBookmark}
+            onEditBookmark={(bm) => {
+              setEditingBookmark(bm);
+              setIsBookmarkModalOpen(true);
+            }}
+            onDeleteBookmark={handleDeleteBookmark}
+            onAddBookmark={() => {
+              setEditingBookmark(null);
+              setIsBookmarkModalOpen(true);
+            }}
+          />
+        </div>
 
-                {/* Wall Canvas Quick Action Toolbar: Fold/Unfold, Hide/Show Notes, Hide/Show To-Dos */}
-                <div className="w-full flex items-center justify-between px-2 py-1 text-xs z-20 select-none">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        sounds.playPaperRustle();
-                        handleFoldAll();
-                      }}
-                      title="Fold or Unfold all items on desk"
-                      className="px-2.5 py-1 bg-white/90 hover:bg-white border border-slate-900 rounded-md font-comic font-bold text-slate-800 shadow-xs flex items-center gap-1 transition-all"
-                    >
-                      <span>📁</span>
-                      <span>Fold / Unfold All</span>
-                    </button>
+        {/* Wall Canvas Quick Action Toolbar: Fold/Unfold, Hide/Show Notes, Hide/Show To-Dos */}
+        <div className="w-full flex items-center justify-between px-2 py-1 text-xs select-none pointer-events-auto">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                sounds.playPaperRustle();
+                handleFoldAll();
+              }}
+              title="Fold or Unfold all items on desk"
+              className="px-2.5 py-1 bg-white/90 hover:bg-white border border-slate-900 rounded-md font-comic font-bold text-slate-800 shadow-xs flex items-center gap-1 transition-all"
+            >
+              <span>📁</span>
+              <span>Fold / Unfold All</span>
+            </button>
 
             <button
               onClick={() => {
@@ -583,61 +589,61 @@ export default function App() {
             </button>
           </div>
 
-                  <div className="hidden sm:flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        sounds.playPaperRustle();
-                        setIsNewSheetModalOpen(true);
-                      }}
-                      className="text-xs font-comic font-bold text-slate-700 hover:text-slate-950 flex items-center gap-1 bg-white/80 hover:bg-white px-2.5 py-1 rounded-md border border-slate-900/30 shadow-xs"
-                    >
-                      <span>+ New To-Do Sheet</span>
-                    </button>
-                  </div>
-                </div>
+          <div className="hidden sm:flex items-center gap-2">
+            <button
+              onClick={() => {
+                sounds.playPaperRustle();
+                setIsNewSheetModalOpen(true);
+              }}
+              className="text-xs font-comic font-bold text-slate-700 hover:text-slate-950 flex items-center gap-1 bg-white/80 hover:bg-white px-2.5 py-1 rounded-md border border-slate-900/30 shadow-xs"
+            >
+              <span>+ New To-Do Sheet</span>
+            </button>
+          </div>
+        </div>
+      </main>
 
-                {/* Unified Freeform Scrapbook Wall: Draggable To-Do Sheets & Draggable Paper Notes */}
-                <div className="w-full relative flex-1 overflow-hidden my-1 pb-4">
-                  {showTodos && (
-                    <TaskChecklist
-                      sheets={todoSheets}
-                      tasks={tasks}
-                      onToggleTask={handleToggleTask}
-                      onAddTask={handleAddTask}
-                      onDeleteTask={handleDeleteTask}
-                      onUpdatePriority={handleUpdateTaskPriority}
-                      onSheetDragEnd={handleSheetDragEnd}
-                      onDeleteSheet={handleDeleteTodoSheet}
-                      onToggleCollapseSheet={handleToggleCollapseSheet}
-                      onOpenNewSheetModal={() => setIsNewSheetModalOpen(true)}
-                    />
-          )}
+      {/* FREEFORM DESK CANVAS: Spans the ENTIRE DESK (100vw x 100vh) */}
+      <div className="absolute inset-0 pointer-events-none z-15 overflow-hidden">
+        {showTodos && (
+          <TaskChecklist
+            sheets={todoSheets}
+            tasks={tasks}
+            onToggleTask={handleToggleTask}
+            onAddTask={handleAddTask}
+            onDeleteTask={handleDeleteTask}
+            onUpdatePriority={handleUpdateTaskPriority}
+            onSheetDragEnd={handleSheetDragEnd}
+            onDeleteSheet={handleDeleteTodoSheet}
+            onToggleCollapseSheet={handleToggleCollapseSheet}
+            onOpenNewSheetModal={() => setIsNewSheetModalOpen(true)}
+          />
+        )}
 
-                  {showNotes &&
-                    notes.map((note) => (
-                      <PaperNoteCard
-                        key={note.id}
-                        note={note}
-                        onEdit={(n) => {
-                          setEditingNote(n);
-                          setIsNoteModalOpen(true);
-                        }}
-                        onDelete={handleDeleteNote}
-                        onTogglePin={handleToggleNotePin}
-                        onColorChange={handleNoteColorChange}
-                        onToggleCollapse={handleToggleCollapseNote}
-                        onDragEnd={handleNoteDragEnd}
-                      />
-                    ))}
-                </div>
-              </main>
+        {showNotes &&
+          notes.map((note) => (
+            <PaperNoteCard
+              key={note.id}
+              note={note}
+              onEdit={(n) => {
+                setEditingNote(n);
+                setIsNoteModalOpen(true);
+              }}
+              onDelete={handleDeleteNote}
+              onTogglePin={handleToggleNotePin}
+              onColorChange={handleNoteColorChange}
+              onToggleCollapse={handleToggleCollapseNote}
+              onDragEnd={handleNoteDragEnd}
+            />
+          ))}
+      </div>
 
-              {/* Subtle Footer Watermark */}
-                  <footer className="w-full text-center py-1 z-10 select-none opacity-40 hover:opacity-100 transition-opacity">
-                    <span className="font-comic text-[11px] tracking-wider font-bold text-slate-800">
-                      LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search • Fold notes or drag anywhere
-                    </span>
-                  </footer>
+      {/* Subtle Footer Watermark */}
+      <footer className="w-full text-center py-1 z-20 relative select-none opacity-40 hover:opacity-100 transition-opacity pointer-events-none">
+        <span className="font-comic text-[11px] tracking-wider font-bold text-slate-800 pointer-events-auto">
+          LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search • Fold notes or drag anywhere
+        </span>
+      </footer>
 
                   {/* --- Modals --- */}
                   {/* 1. Note Editor Modal */}
