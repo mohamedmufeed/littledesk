@@ -165,11 +165,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               sounds.playComicClick();
               setActiveTab('appearance');
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-comic font-bold tracking-wide transition-all ${
-              activeTab === 'appearance'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-comic font-bold tracking-wide transition-all ${activeTab === 'appearance'
                 ? 'bg-desk-comicYellow text-slate-950 border-2 border-slate-900 shadow-comicPressed'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             <Palette className="w-3.5 h-3.5" />
             <span>Theme & Wallpaper</span>
@@ -180,11 +179,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               sounds.playComicClick();
               setActiveTab('account');
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-comic font-bold tracking-wide transition-all ${
-              activeTab === 'account'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-comic font-bold tracking-wide transition-all ${activeTab === 'account'
                 ? 'bg-desk-comicYellow text-slate-950 border-2 border-slate-900 shadow-comicPressed'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             <Cloud className="w-3.5 h-3.5" />
             <span>Cloud Sync</span>
@@ -195,11 +193,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               sounds.playComicClick();
               setActiveTab('general');
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-comic font-bold tracking-wide transition-all ${
-              activeTab === 'general'
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-comic font-bold tracking-wide transition-all ${activeTab === 'general'
                 ? 'bg-desk-comicYellow text-slate-950 border-2 border-slate-900 shadow-comicPressed'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Preferences</span>
@@ -223,11 +220,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         sounds.playComicClick();
                         onUpdateSettings({ theme: th.id });
                       }}
-                      className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${
-                        settings.theme === th.id
+                      className={`border-2 rounded-xl p-3 cursor-pointer transition-all ${settings.theme === th.id
                           ? 'border-slate-900 shadow-comic bg-amber-50/50'
                           : 'border-slate-200 hover:border-slate-400 bg-white'
-                      }`}
+                        }`}
                     >
                       <div className={`h-12 w-full rounded-md border border-slate-900/20 mb-2 ${th.previewClass}`} />
                       <div className="flex items-center justify-between">
@@ -257,11 +253,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         sounds.playComicClick();
                         onUpdateSettings({ fontPreference: font });
                       }}
-                      className={`flex-1 py-2 px-3 rounded-lg border-2 text-xs font-bold capitalize transition-all ${
-                        settings.fontPreference === font
+                      className={`flex-1 py-2 px-3 rounded-lg border-2 text-xs font-bold capitalize transition-all ${settings.fontPreference === font
                           ? 'border-slate-900 bg-white shadow-comic text-slate-900'
                           : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-white'
-                      }`}
+                        }`}
                     >
                       {font === 'comic' && 'Comic Neue & Bangers'}
                       {font === 'handwritten' && 'Caveat Handwritten'}
@@ -445,9 +440,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     if (nextVal) sounds.playComicClick();
                     onUpdateSettings({ soundEffects: nextVal });
                   }}
-                  className={`p-2 rounded-lg border-2 ${
-                    settings.soundEffects ? 'bg-amber-100 border-slate-900 text-slate-900' : 'bg-slate-100 border-slate-300 text-slate-400'
-                  }`}
+                  className={`p-2 rounded-lg border-2 ${settings.soundEffects ? 'bg-amber-100 border-slate-900 text-slate-900' : 'bg-slate-100 border-slate-300 text-slate-400'
+                    }`}
                 >
                   {settings.soundEffects ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                 </button>

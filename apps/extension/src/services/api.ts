@@ -54,46 +54,46 @@ class ApiService {
   }
 
   async register(name: string, email: string, password: string): Promise<AuthResponse> {
-    const res = await fetch(`${getApiBaseUrl()}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-    });
+      const res = await fetch(`${getApiBaseUrl()}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Registration failed' }));
-      throw new Error(err.message || 'Registration failed');
-    }
-
-    const data: AuthResponse = await res.json();
-    await storage.setAuthTokens(data.tokens);
-    await storage.setUserInfo(data.user);
-    return data;
+      if(!res.ok) {
+        const err = await res.json().catch(() => ({ message: 'Registration failed' }));
+    throw new Error(err.message || 'Registration failed');
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
+  const data: AuthResponse = await res.json();
+    await storage.setAuthTokens(data.tokens);
+await storage.setUserInfo(data.user);
+return data;
+  }
+
+  async login(email: string, password: string): Promise < AuthResponse > {
     const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ message: 'Invalid credentials' }));
-      throw new Error(err.message || 'Invalid email or password');
-    }
+    if(!res.ok) {
+  const err = await res.json().catch(() => ({ message: 'Invalid credentials' }));
+  throw new Error(err.message || 'Invalid email or password');
+}
 
-    const data: AuthResponse = await res.json();
-    await storage.setAuthTokens(data.tokens);
-    await storage.setUserInfo(data.user);
-    return data;
+const data: AuthResponse = await res.json();
+await storage.setAuthTokens(data.tokens);
+await storage.setUserInfo(data.user);
+return data;
   }
 
-  async logout(): Promise<void> {
-    try {
-      const { refreshToken } = await storage.getAuthTokens();
-      if (refreshToken) {
-        await fetch(`${getApiBaseUrl()}/auth/logout`, {
+  async logout(): Promise < void> {
+  try {
+    const { refreshToken } = await storage.getAuthTokens();
+    if(refreshToken) {
+        await fetch(`${getApiBaseUrl()}/ auth / logout`, {
           method: 'POST',
           headers: await this.getHeaders(),
           body: JSON.stringify({ refreshToken }),
@@ -107,7 +107,7 @@ class ApiService {
   }
 
   async getMe(): Promise<any> {
-    const res = await fetch(`${getApiBaseUrl()}/auth/me`, {
+    const res = await fetch(`${ getApiBaseUrl() } /auth/me`, {
       headers: await this.getHeaders(),
     });
     if (!res.ok) throw new Error('Not authenticated');
@@ -115,7 +115,7 @@ class ApiService {
   }
 
   async pushSync(payload: SyncPushPayload): Promise<{ success: boolean; syncedAt: string }> {
-    const res = await fetch(`${getApiBaseUrl()}/sync/push`, {
+    const res = await fetch(`${ getApiBaseUrl() } /sync/push`, {
       method: 'POST',
       headers: await this.getHeaders(),
       body: JSON.stringify(payload),
@@ -128,7 +128,7 @@ class ApiService {
   }
 
   async pullSync(lastSyncedAt?: string): Promise<SyncPullResponse> {
-    const url = new URL(`${getApiBaseUrl()}/sync/pull`);
+    const url = new URL(`${ getApiBaseUrl() } /sync/pull`);
     if (lastSyncedAt) {
       url.searchParams.set('since', lastSyncedAt);
     }
