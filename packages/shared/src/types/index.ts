@@ -85,7 +85,9 @@ export type WallpaperTheme =
   | 'comic-studio'
   | 'pastel-grid'
   | 'blueprint-desk'
-  | 'kraft-paper';
+  | 'kraft-paper'
+  | 'midnight-studio'
+  | 'dark-corkboard';
 
 export interface UserSettings {
   userId?: string;
@@ -94,6 +96,7 @@ export interface UserSettings {
   theme: WallpaperTheme;
   wallpaper: string;
   fontPreference: 'comic' | 'handwritten' | 'sans';
+  darkMode?: boolean;
   soundEffects: boolean;
   reducedMotion: boolean;
   animationIntensity: number; // 0 to 1

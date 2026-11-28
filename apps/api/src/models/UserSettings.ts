@@ -7,6 +7,7 @@ export interface IUserSettingsDocument extends Document {
   theme: string;
   wallpaper: string;
   fontPreference: string;
+  darkMode?: boolean;
   soundEffects: boolean;
   reducedMotion: boolean;
   animationIntensity: number;
@@ -30,6 +31,7 @@ const UserSettingsSchema = new Schema<IUserSettingsDocument>(
     theme: { type: String, default: 'comic-studio' },
     wallpaper: { type: String, default: 'default' },
     fontPreference: { type: String, default: 'comic' },
+    darkMode: { type: Boolean, default: false },
     soundEffects: { type: Boolean, default: true },
     reducedMotion: { type: Boolean, default: false },
     animationIntensity: { type: Number, default: 0.8 },

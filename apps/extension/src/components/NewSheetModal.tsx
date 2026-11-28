@@ -58,15 +58,15 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="relative w-full max-w-md bg-white border-2 border-slate-900 rounded-xl shadow-comicLg p-6">
+      <div className="relative w-full max-w-md bg-white dark:bg-[#1A2234] border-2 border-slate-900 dark:border-slate-700 rounded-xl shadow-comicLg dark:shadow-[5px_5px_0px_#090D15] p-6">
         {/* Masking tape on top */}
         <div className="masking-tape h-4 w-28 mx-auto -mt-8 mb-4 opacity-90 rounded-sm" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-2 border-b-2 border-slate-900 mb-4">
+        <div className="flex items-center justify-between pb-2 border-b-2 border-slate-900 dark:border-slate-700 mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-desk-comicRed" />
-            <h2 className="font-comic text-xl text-slate-900 font-bold">
+            <h2 className="font-comic text-xl text-slate-900 dark:text-slate-100 font-bold">
               PIN NEW TO-DO SHEET
             </h2>
           </div>
@@ -75,7 +75,7 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
               sounds.playComicClick();
               onClose();
             }}
-            className="p-1 rounded hover:bg-slate-100 text-slate-700"
+            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -84,7 +84,7 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Sheet Title */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Sheet Title / Goal List Name:
             </label>
             <input
@@ -94,13 +94,13 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. WORK SPRINTS, GROCERIES, IDEAS..."
-              className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-sm font-comic font-bold text-slate-900 focus:outline-none focus:bg-white"
+              className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-comic font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:bg-white dark:focus:bg-slate-800"
             />
           </div>
 
           {/* Optional First Task */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               First Task (Optional):
             </label>
             <input
@@ -108,13 +108,13 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
               value={initialTask}
               onChange={(e) => setInitialTask(e.target.value)}
               placeholder="e.g. Finish morning review..."
-              className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 focus:outline-none focus:bg-white"
+              className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:bg-white dark:focus:bg-slate-800"
             />
           </div>
 
           {/* Paper Color */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Paper Texture & Color:
             </label>
             <div className="flex items-center flex-wrap gap-2">
@@ -124,7 +124,7 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
                   type="button"
                   onClick={() => setPaperColor(c.id)}
                   title={c.label}
-                  className={`w-6 h-6 rounded-full border-2 border-slate-900 transition-transform ${paperColor === c.id ? 'scale-125 ring-2 ring-slate-900' : 'hover:scale-110'
+                  className={`w-6 h-6 rounded-full border-2 border-slate-900 dark:border-slate-700 transition-transform ${paperColor === c.id ? 'scale-125 ring-2 ring-slate-900 dark:ring-amber-400' : 'hover:scale-110'
                     }`}
                   style={{ backgroundColor: c.hex }}
                 />
@@ -134,7 +134,7 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
 
           {/* Pin Style */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Attachment Pin:
             </label>
             <div className="flex items-center gap-2">
@@ -149,8 +149,8 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
                   type="button"
                   onClick={() => setPinType(pin.id as any)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all ${pinType === pin.id
-                      ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                    ? 'bg-slate-900 text-white dark:bg-amber-400 dark:text-slate-950 border-slate-900 dark:border-amber-400 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                     }`}
                 >
                   {pin.label}
@@ -160,14 +160,14 @@ export const NewSheetModal: React.FC<NewSheetModalProps> = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t-2 border-slate-900 mt-2">
+          <div className="flex items-center justify-end gap-2 pt-3 border-t-2 border-slate-900 dark:border-slate-700 mt-2">
             <button
               type="button"
               onClick={() => {
                 sounds.playComicClick();
                 onClose();
               }}
-              className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900"
+              className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             >
               Cancel
             </button>

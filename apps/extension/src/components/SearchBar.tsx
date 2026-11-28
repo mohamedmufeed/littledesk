@@ -99,12 +99,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const activeProvider = SEARCH_PROVIDERS[provider] || SEARCH_PROVIDERS.google;
 
   return (
-      <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-4 z-40 my-4">
-        {/* Decorative Masking Tape on Top of Search Panel */}
-        <div className="masking-tape h-4 w-32 mx-auto -mb-2 rotate-[-1deg] opacity-90 rounded-sm z-10" />
+    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto px-4 z-40 my-4">
+      {/* Decorative Masking Tape on Top of Search Panel */}
+      <div className="masking-tape h-4 w-32 mx-auto -mb-2 rotate-[-1deg] opacity-90 rounded-sm z-10" />
 
-        {/* Main Physical Search Banner */}
-        <div className="relative bg-white border-2 border-slate-900 rounded-xl shadow-comic p-1.5 transition-all focus-within:shadow-comicLg">
+      {/* Main Physical Search Banner */}
+        <div className="relative bg-white border-2 border-slate-900 rounded-xl shadow-comic dark:shadow-[4px_4px_0px_#05080E] p-1.5 transition-all focus-within:shadow-comicLg dark:focus-within:shadow-[5px_5px_0px_#05080E]">
           <div className="flex items-center gap-2">
             {/* Provider Selector Button */}
             <div className="relative">
@@ -118,129 +118,133 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               >
                 <span>{activeProvider.icon}</span>
                 <span className="hidden sm:inline font-comic tracking-wide">{activeProvider.name}</span>
-                <span className="text-[10px] text-slate-500">▼</span>
+                <span className="text-[10px] text-slate-600">▼</span>
               </button>
 
               {/* Provider Dropdown Menu */}
               {isProviderMenuOpen && (
-                <div className="absolute left-0 mt-2 w-44 bg-white border-2 border-slate-900 rounded-lg shadow-comic py-1.5 z-50">
-                  {(Object.keys(SEARCH_PROVIDERS) as SearchProvider[]).map((pKey) => {
-                    const p = SEARCH_PROVIDERS[pKey];
-                    return (
-                      <button
-                        key={pKey}
-                        type="button"
-                        onClick={() => {
-                          sounds.playComicClick();
-                          onProviderChange(pKey);
-                          setIsProviderMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left font-bold transition-colors ${provider === pKey ? 'bg-amber-100 text-slate-900' : 'hover:bg-slate-100 text-slate-700'
-                          }`}
-                      >
-                        <span>{p.icon}</span>
-                        <span>{p.name}</span>
-                        {provider === pKey && <span className="ml-auto text-desk-comicRed font-extrabold">✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Search Input */}
-            <div className="relative flex-1 flex items-center">
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setIsOpen(true);
-                }}
-                onFocus={() => setIsOpen(true)}
-                onKeyDown={handleKeyDown}
-                placeholder={activeProvider.placeholder}
-                className="w-full bg-transparent px-2 py-1.5 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQuery('');
-                    setSuggestions([]);
-                    inputRef.current?.focus();
-                  }}
-                  className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Submit Search Button */}
-            <button
-              type="button"
-              onClick={() => handleSubmit()}
-              className="comic-btn bg-desk-comicBlue text-white font-comic px-3.5 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
-            >
-              <Search className="w-4 h-4 stroke-[2.5]" />
-              <span className="hidden sm:inline">Go</span>
-            </button>
-          </div>
-
-          {/* Autocomplete Suggestions Dropdown */}
-          {isOpen && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-white border-2 border-slate-900 rounded-xl shadow-comicLg overflow-hidden z-50 py-1">
-                {suggestions.map((suggestion, idx) => (
-                  <div
-                    key={idx}
-                    onMouseEnter={() => setSelectedIndex(idx)}
-                    onClick={() => handleSubmit(suggestion)}
-                    className={`flex items-center justify-between px-4 py-2 text-sm cursor-pointer transition-colors ${selectedIndex === idx ? 'bg-amber-100 text-slate-950 font-semibold' : 'text-slate-700 hover:bg-slate-50'
-                      }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Search className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{suggestion}</span>
-                    </div>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="absolute left-0 mt-2 w-44 bg-white border-2 border-slate-900 rounded-lg shadow-comic dark:shadow-[3px_3px_0px_#05080E] py-1.5 z-50">
+                    {(Object.keys(SEARCH_PROVIDERS) as SearchProvider[]).map((pKey) => {
+                      const p = SEARCH_PROVIDERS[pKey];
+                      return (
+                        <button
+                          key={pKey}
+                          type="button"
+                          onClick={() => {
+                            sounds.playComicClick();
+                            onProviderChange(pKey);
+                            setIsProviderMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-2 px-3 py-1.5 text-xs text-left font-bold transition-colors ${provider === pKey
+                              ? 'bg-amber-100 text-slate-900'
+                              : 'hover:bg-slate-100 text-slate-700'
+                            }`}
+                        >
+                          <span>{p.icon}</span>
+                          <span>{p.name}</span>
+                          {provider === pKey && <span className="ml-auto text-desk-comicRed font-extrabold">✓</span>}
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
+            )}
+                </div>
+
+          {/* Search Input */}
+              <div className="relative flex-1 flex items-center">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setIsOpen(true);
+                  }}
+                  onFocus={() => setIsOpen(true)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={activeProvider.placeholder}
+                  className="w-full bg-transparent px-2 py-1.5 text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery('');
+                      setSuggestions([]);
+                      inputRef.current?.focus();
+                    }}
+                    className="p-1 text-slate-400 hover:text-slate-600 rounded-full"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
-        )}
+
+              {/* Submit Search Button */}
+              <button
+                type="button"
+                onClick={() => handleSubmit()}
+                className="comic-btn bg-desk-comicBlue text-white font-comic px-3.5 py-1.5 rounded-lg text-sm flex items-center gap-1 cursor-pointer"
+              >
+                <Search className="w-4 h-4 stroke-[2.5]" />
+                <span className="hidden sm:inline">Go</span>
+              </button>
             </div>
+
+            {/* Autocomplete Suggestions Dropdown */}
+            {isOpen && suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white border-2 border-slate-900 rounded-xl shadow-comicLg dark:shadow-[5px_5px_0px_#05080E] overflow-hidden z-50 py-1">
+                  {suggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      onMouseEnter={() => setSelectedIndex(idx)}
+                      onClick={() => handleSubmit(suggestion)}
+                      className={`flex items-center justify-between px-4 py-2 text-sm cursor-pointer transition-colors ${selectedIndex === idx
+                          ? 'bg-amber-100 text-slate-950 font-bold'
+                          : 'text-slate-800 hover:bg-slate-50'
+                        }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Search className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{suggestion}</span>
+                      </div>
+                      <ArrowUpRight className="w-3.5 h-3.5 text-slate-500" />
+                    </div>
+                  ))}
+                </div>
+        )}
+              </div>
 
       {/* Recent Searches Tags Strip */}
-          {recentSearches.length > 0 && (
-            <div className="flex items-center flex-wrap gap-1.5 mt-2.5 px-2">
-              <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 uppercase tracking-wider font-comic">
-                <Clock className="w-3 h-3" />
-                <span>Recent:</span>
+            {recentSearches.length > 0 && (
+              <div className="flex items-center flex-wrap gap-1.5 mt-2.5 px-2">
+                  <div className="flex items-center gap-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider font-comic">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    <span>Recent:</span>
+                  </div>
+                  {recentSearches.slice(0, 5).map((term, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setQuery(term);
+                        handleSubmit(term);
+                      }}
+                      className="bg-white/95 hover:bg-white border-2 border-slate-900 text-slate-800 hover:text-slate-950 text-xs px-2.5 py-0.5 rounded-full font-bold transition-all shadow-comic dark:shadow-[2px_2px_0px_#05080E] hover:scale-105"
+                    >
+                      {term}
+                    </button>
+                  ))}
+                  {recentSearches.length > 0 && (
+                    <button
+                      onClick={onClearRecentSearches}
+                      title="Clear recent searches"
+                      className="text-slate-400 hover:text-rose-600 text-xs p-1 transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+      )}
               </div>
-              {recentSearches.slice(0, 5).map((term, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setQuery(term);
-                    handleSubmit(term);
-                  }}
-                  className="bg-white/80 hover:bg-white border border-slate-900/30 text-slate-700 hover:text-slate-900 text-xs px-2.5 py-0.5 rounded-full font-medium transition-all shadow-sm hover:shadow"
-                >
-                  {term}
-                </button>
-              ))}
-              {recentSearches.length > 0 && (
-                <button
-                  onClick={onClearRecentSearches}
-                  title="Clear recent searches"
-                  className="text-slate-400 hover:text-rose-600 text-xs p-1 transition-colors"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-        );
+            );
 };

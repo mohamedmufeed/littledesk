@@ -459,20 +459,32 @@ export default function App() {
     storage.saveRecentSearches([]);
   };
 
+  // Sync document dark mode class
+  const isDarkMode = Boolean(settings.darkMode);
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   // Background Theme Class
   const themeClassMap: Record<string, string> = {
-    'comic-studio': 'bg-[#F6F1EA] graph-paper-pattern',
-    'vintage-corkboard': 'corkboard-pattern',
-    'pastel-grid': 'bg-[#FDFBF7] graph-paper-pattern',
-    'blueprint-desk': 'bg-[#1E3A5F] text-white',
-    'kraft-paper': 'bg-[#E5D3B3]',
+    'comic-studio': isDarkMode ? 'dark-cutting-mat-pattern bg-[#101622] text-slate-100' : 'bg-[#F6F1EA] graph-paper-pattern',
+    'vintage-corkboard': isDarkMode ? 'dark-corkboard-pattern text-stone-100' : 'corkboard-pattern',
+    'pastel-grid': isDarkMode ? 'dark-graph-paper-pattern bg-[#141b28] text-slate-100' : 'bg-[#FDFBF7] graph-paper-pattern',
+    'blueprint-desk': isDarkMode ? 'bg-[#091322] text-cyan-100' : 'bg-[#1E3A5F] text-white',
+    'kraft-paper': isDarkMode ? 'bg-[#221a14] text-amber-100' : 'bg-[#E5D3B3]',
+    'midnight-studio': 'dark-cutting-mat-pattern bg-[#101622] text-slate-100',
+    'dark-corkboard': 'dark-corkboard-pattern text-stone-100',
   };
   const activeThemeClass = themeClassMap[settings.theme] || themeClassMap['comic-studio'];
 
   return (
     <div
       ref={deskRef}
-      className={`h-screen max-h-screen w-full relative overflow-hidden flex flex-col justify-between transition-colors duration-300 select-none ${activeThemeClass}`}
+      className={`h-screen max-h-screen w-full relative overflow-hidden flex flex-col justify-between transition-colors duration-300 select-none ${isDarkMode ? 'dark' : ''} ${activeThemeClass}`}
     >
       {/* Halftone texture overlay */}
       <div className="halftone-dots fixed inset-0 pointer-events-none z-0" />
@@ -500,6 +512,7 @@ export default function App() {
           onNewNote={handleCreateNote}
           onNewSheet={() => setIsNewSheetModalOpen(true)}
           onManualSync={handleManualSync}
+          onToggleDarkMode={() => handleUpdateSettings({ darkMode: !settings.darkMode })}
         />
       </div>
 
@@ -572,7 +585,7 @@ export default function App() {
 
       {/* Subtle Footer Watermark */}
       <footer className="w-full text-center py-1 z-20 relative select-none opacity-40 hover:opacity-100 transition-opacity pointer-events-none">
-        <span className="font-comic text-[11px] tracking-wider font-bold text-slate-800 pointer-events-auto">
+        <span className="font-comic text-[11px] tracking-wider font-bold text-slate-800 dark:text-slate-400 pointer-events-auto">
           LittleDesk — Your Personal 3D Comic Scrapbook • Press '/' to search • Fold notes or drag anywhere
         </span>
       </footer>

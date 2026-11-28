@@ -256,6 +256,7 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   theme: 'comic-studio',
   wallpaper: 'default',
   fontPreference: 'comic',
+  darkMode: false,
   soundEffects: true,
   reducedMotion: false,
   animationIntensity: 0.8,

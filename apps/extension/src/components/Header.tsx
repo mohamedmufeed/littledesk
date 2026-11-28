@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   ClipboardList,
   Cloud,
+  Moon,
   Plus,
   RefreshCw,
   Settings as SettingsIcon,
@@ -20,6 +21,7 @@ interface HeaderProps {
   onNewNote: () => void;
   onNewSheet: () => void;
   onManualSync: () => void;
+  onToggleDarkMode: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onNewNote,
   onNewSheet,
   onManualSync,
+  onToggleDarkMode,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -58,128 +61,145 @@ export const Header: React.FC<HeaderProps> = ({
   });
 
   return (
-      <header className="relative z-10 w-full px-4 sm:px-8 pt-4 pb-2 flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Left: Greeting & Calendar Note Tag */}
-        <div className="flex items-center gap-3.5">
-          <div className="relative bg-white border-2 border-slate-900 rounded-lg px-4 py-2 shadow-comic rotate-[-1deg] transition-transform hover:rotate-0">
+    <header className="relative z-10 w-full px-4 sm:px-8 pt-4 pb-2 flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Left: Greeting & Calendar Note Tag */}
+      <div className="flex items-center gap-3.5">
+          <div className="relative bg-white border-2 border-slate-900 rounded-lg px-4 py-2 shadow-comic dark:shadow-[3px_3px_0px_#05080E] rotate-[-1deg] transition-all hover:rotate-0">
             {/* Mini push pin */}
             <div className="absolute -top-2 left-3 pushpin pushpin-red" />
-            <h1 className="font-comic text-2xl sm:text-3xl tracking-wide text-slate-900 leading-tight">
-              {greetingText},{' '}
-              <span className="text-desk-comicRed underline decoration-wavy decoration-desk-comicYellow decoration-2">
-                {user?.name || settings.userName || 'Mufeed'}
-              </span>
-              !
-            </h1>
-            <p className="font-handwritten text-sm text-slate-600 font-bold mt-0.5">
-              📅 {formattedDate}
-            </p>
-          </div>
+              <h1 className="font-comic text-2xl sm:text-3xl tracking-wide text-slate-900 leading-tight">
+                {greetingText},{' '}
+                <span className="text-desk-comicRed underline decoration-wavy decoration-desk-comicYellow decoration-2">
+                  {user?.name || settings.userName || 'Mufeed'}
+                </span>
+                !
+              </h1>
+                <p className="font-handwritten text-sm text-slate-600 font-bold mt-0.5">
+                  📅 {formattedDate}
+                </p>
+              </div>
 
-          {/* Live Clock Comic Badge */}
-          <div className="hidden sm:flex items-center bg-[#FEF08A] border-2 border-slate-900 rounded-md px-3 py-1.5 shadow-comic rotate-[1.5deg]">
-            <span className="font-mono text-sm font-extrabold text-slate-900 tracking-wider">
-              ⏱️ {formattedTime}
-            </span>
-          </div>
-        </div>
+              {/* Live Clock Comic Badge */}
+                  <div className="hidden sm:flex items-center bg-[#FEF08A] border-2 border-slate-900 rounded-md px-3 py-1.5 shadow-comic dark:shadow-[2px_2px_0px_#05080E] rotate-[1.5deg]">
+                    <span className="font-mono text-sm font-extrabold text-slate-900 tracking-wider">
+                      ⏱️ {formattedTime}
+                    </span>
+                  </div>
+              </div>
 
-        {/* Right: Weather, Sync Status, Actions */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5">
-          {/* Weather Badge */}
-          {settings.enableWeather && (
-            <div className="flex items-center gap-1.5 bg-sky-100 border-2 border-slate-900 rounded-md px-2.5 py-1 text-xs font-bold shadow-comic">
-              <Sun className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" />
-              <span className="text-slate-800">72°F Partly Sunny</span>
-            </div>
-          )}
+              {/* Right: Weather, Sync Status, Actions */}
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                {/* Quick Dark Mode Toggle Button */}
+                <button
+                  onClick={() => {
+                    sounds.playComicClick();
+                    onToggleDarkMode();
+                  }}
+                  title={settings.darkMode ? 'Switch to Light Mode ☀️' : 'Switch to Dark Mode 🌙'}
+                  aria-label="Toggle Dark Mode"
+                  className="comic-btn flex items-center justify-center w-8 h-8 bg-white border-2 border-slate-900 text-slate-800 rounded-md hover:bg-slate-100 cursor-pointer shadow-comic dark:shadow-[2px_2px_0px_#05080E]"
+                >
+                  {settings.darkMode ? (
+            <Sun className="w-4 h-4 text-amber-500 animate-spin-slow" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-slate-700" />
+                  )}
+                </button>
 
-          {/* Sync Status Button */}
-          <button
-            onClick={() => {
-              sounds.playComicClick();
-              onManualSync();
-            }}
-            title={`Status: ${syncState.toUpperCase()} - Click to sync`}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border-2 border-slate-900 shadow-comic bg-white hover:bg-slate-50 transition-all active:translate-y-0.5"
-          >
-            {syncState === 'synced' && (
-              <>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-emerald-700">Synced</span>
-              </>
-            )}
-            {syncState === 'syncing' && (
-              <>
-                <RefreshCw className="w-3 h-3 text-sky-600 animate-spin" />
-                <span className="text-sky-700">Syncing...</span>
-              </>
-            )}
-            {syncState === 'offline' && (
-              <>
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                <span className="text-amber-800">Offline</span>
-              </>
-            )}
-            {syncState === 'error' && (
-              <>
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span className="text-rose-700">Sync Failed</span>
-              </>
-            )}
-          </button>
+                {/* Weather Badge */}
+                {settings.enableWeather && (
+                    <div className="flex items-center gap-1.5 bg-sky-100 border-2 border-slate-900 rounded-md px-2.5 py-1 text-xs font-bold shadow-comic dark:shadow-[2px_2px_0px_#05080E] text-slate-800">
+                      <Sun className="w-3.5 h-3.5 text-amber-500 animate-spin-slow" />
+                      <span>72°F Partly Sunny</span>
+                    </div>
+        )}
 
-          {/* Add To-Do Sheet Button */}
-          <button
-            onClick={() => {
-              sounds.playPaperRustle();
-              onNewSheet();
-            }}
-            className="comic-btn flex items-center gap-1.5 bg-white text-slate-900 font-comic font-bold tracking-wide px-3 py-1.5 rounded-md text-sm cursor-pointer hover:bg-slate-50"
-          >
-            <ClipboardList className="w-4 h-4 text-desk-comicRed" />
-            <span>New To-Do Sheet</span>
-          </button>
+                    {/* Sync Status Button */}
+                    <button
+                      onClick={() => {
+                        sounds.playComicClick();
+                        onManualSync();
+                      }}
+                      title={`Status: ${syncState.toUpperCase()} - Click to sync`}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border-2 border-slate-900 shadow-comic dark:shadow-[2px_2px_0px_#05080E] bg-white hover:bg-slate-50 transition-all active:translate-y-0.5 cursor-pointer text-slate-900"
+                    >
+                      {syncState === 'synced' && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-emerald-700 font-bold">Synced</span>
+                        </>
+                      )}
+                      {syncState === 'syncing' && (
+                        <>
+                          <RefreshCw className="w-3 h-3 text-sky-600 animate-spin" />
+                          <span className="text-sky-700 font-bold">Syncing...</span>
+                        </>
+                      )}
+                      {syncState === 'offline' && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-amber-500" />
+                          <span className="text-amber-800 font-bold">Offline</span>
+                        </>
+                      )}
+                      {syncState === 'error' && (
+                        <>
+                          <span className="w-2 h-2 rounded-full bg-rose-500" />
+                          <span className="text-rose-700 font-bold">Sync Failed</span>
+                        </>
+                      )}
+                    </button>
 
-          {/* Add Note Button */}
-          <button
-            onClick={() => {
-              sounds.playPaperRustle();
-              onNewNote();
-            }}
-            className="comic-btn flex items-center gap-1.5 bg-desk-comicYellow text-slate-950 font-comic font-bold tracking-wide px-3.5 py-1.5 rounded-md text-sm cursor-pointer"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>New Note</span>
-          </button>
+                    {/* Add To-Do Sheet Button */}
+                    <button
+                      onClick={() => {
+                        sounds.playPaperRustle();
+                        onNewSheet();
+                      }}
+                      className="comic-btn flex items-center gap-1.5 bg-white text-slate-900 font-comic font-bold tracking-wide px-3 py-1.5 rounded-md text-sm cursor-pointer hover:bg-slate-50 border-2 border-slate-900 shadow-comic dark:shadow-[2px_2px_0px_#05080E]"
+                    >
+                      <ClipboardList className="w-4 h-4 text-desk-comicRed" />
+                      <span>New To-Do Sheet</span>
+                    </button>
 
-          {/* Settings Button */}
-          <button
-            onClick={() => {
-              sounds.playComicClick();
-              onOpenSettings();
-            }}
-            aria-label="Settings"
-            className="comic-btn p-1.5 bg-white text-slate-800 rounded-md hover:bg-slate-100 cursor-pointer"
-          >
-            <SettingsIcon className="w-4 h-4" />
-          </button>
+                    {/* Add Note Button */}
+                    <button
+                      onClick={() => {
+                        sounds.playPaperRustle();
+                        onNewNote();
+                      }}
+                      className="comic-btn flex items-center gap-1.5 bg-desk-comicYellow text-slate-950 font-comic font-bold tracking-wide px-3.5 py-1.5 rounded-md text-sm cursor-pointer border-2 border-slate-900 shadow-comic dark:shadow-[2px_2px_0px_#05080E]"
+                    >
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>New Note</span>
+                    </button>
 
-          {/* Account Button */}
-          <button
-            onClick={() => {
-              sounds.playComicClick();
-              onOpenAccount();
-            }}
-            aria-label="Account"
-            className="comic-btn p-1.5 bg-white text-slate-800 rounded-md hover:bg-slate-100 cursor-pointer relative"
-          >
-            <UserIcon className="w-4 h-4" />
-            {user && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-slate-900" />
-            )}
-          </button>
-        </div>
-      </header>
-      );
+                    {/* Settings Button */}
+                    <button
+                      onClick={() => {
+                        sounds.playComicClick();
+                        onOpenSettings();
+                      }}
+                      aria-label="Settings"
+                      className="comic-btn p-1.5 bg-white text-slate-800 rounded-md hover:bg-slate-100 cursor-pointer border-2 border-slate-900 shadow-comic dark:shadow-[2px_2px_0px_#05080E]"
+                    >
+                      <SettingsIcon className="w-4 h-4" />
+                    </button>
+
+                    {/* Account Button */}
+                    <button
+                      onClick={() => {
+                        sounds.playComicClick();
+                        onOpenAccount();
+                      }}
+                      aria-label="Account"
+                      className="comic-btn p-1.5 bg-white text-slate-800 rounded-md hover:bg-slate-100 cursor-pointer relative border-2 border-slate-900 shadow-comic dark:shadow-[2px_2px_0px_#05080E]"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      {user && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-slate-900" />
+                      )}
+                    </button>
+                  </div>
+    </header>
+              );
 };

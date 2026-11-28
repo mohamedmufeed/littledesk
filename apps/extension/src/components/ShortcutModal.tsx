@@ -65,13 +65,13 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="relative w-full max-w-md bg-white border-2 border-slate-900 rounded-xl shadow-comicLg p-6">
+      <div className="relative w-full max-w-md bg-white dark:bg-[#1A2234] border-2 border-slate-900 dark:border-slate-700 rounded-xl shadow-comicLg dark:shadow-[5px_5px_0px_#090D15] p-6">
         {/* Masking tape on top */}
         <div className="masking-tape h-4 w-24 mx-auto -mt-8 mb-4 opacity-90 rounded-sm" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between pb-2 border-b-2 border-slate-900 mb-4">
-          <h2 className="font-comic text-xl text-slate-900 font-bold flex items-center gap-1.5">
+        <div className="flex items-center justify-between pb-2 border-b-2 border-slate-900 dark:border-slate-700 mb-4">
+          <h2 className="font-comic text-xl text-slate-900 dark:text-slate-100 font-bold flex items-center gap-1.5">
             <span>🔖</span>
             <span>{bookmark ? 'EDIT SHORTCUT' : 'NEW DESK SHORTCUT'}</span>
           </h2>
@@ -80,7 +80,7 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
               sounds.playComicClick();
               onClose();
             }}
-            className="p-1 rounded hover:bg-slate-100 text-slate-700"
+            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -89,7 +89,7 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-3.5">
           {/* Title */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Shortcut Title:
             </label>
             <input
@@ -98,13 +98,13 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. GitHub, Notion, Reddit"
-              className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none focus:bg-white"
+              className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:bg-white dark:focus:bg-slate-800"
             />
           </div>
 
           {/* URL */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Web Address (URL):
             </label>
             <input
@@ -113,13 +113,13 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
-              className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none focus:bg-white font-mono"
+              className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:bg-white dark:focus:bg-slate-800 font-mono"
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Category:
             </label>
             <input
@@ -127,13 +127,13 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               placeholder="Productivity, Development, Media..."
-              className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-1.5 text-sm font-semibold focus:outline-none focus:bg-white"
+              className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-900 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:bg-white dark:focus:bg-slate-800"
             />
           </div>
 
           {/* Icon Background Color */}
           <div>
-            <label className="block font-comic text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block font-comic text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               Badge Color:
             </label>
             <div className="flex items-center flex-wrap gap-2">
@@ -142,9 +142,8 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
                   key={hex}
                   type="button"
                   onClick={() => setIconBgColor(hex)}
-                  className={`w-6 h-6 rounded-full border-2 border-slate-900 transition-transform ${
-                    iconBgColor === hex ? 'scale-125 ring-2 ring-slate-900' : 'hover:scale-110'
-                  }`}
+                  className={`w-6 h-6 rounded-full border-2 border-slate-900 dark:border-slate-700 transition-transform ${iconBgColor === hex ? 'scale-125 ring-2 ring-slate-900 dark:ring-amber-400' : 'hover:scale-110'
+                    }`}
                   style={{ backgroundColor: hex }}
                 />
               ))}
@@ -152,7 +151,7 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center justify-between pt-3 border-t-2 border-slate-900 mt-4">
+          <div className="flex items-center justify-between pt-3 border-t-2 border-slate-900 dark:border-slate-700 mt-4">
             {bookmark && onDelete ? (
               <button
                 type="button"
@@ -177,7 +176,7 @@ export const ShortcutModal: React.FC<ShortcutModalProps> = ({
                   sounds.playComicClick();
                   onClose();
                 }}
-                className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:text-slate-900"
+                className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               >
                 Cancel
               </button>

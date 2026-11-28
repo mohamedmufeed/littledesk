@@ -13,14 +13,14 @@ interface PaperNoteCardProps {
   onDragEnd: (id: string, x: number, y: number) => void;
 }
 
-const COLOR_CLASSES: Record<NoteColor, { bg: string; border: string; tape: string }> = {
-  yellow: { bg: 'bg-[#FEF9C3]', border: 'border-[#FACC15]', tape: 'bg-amber-200/80' },
-  cream: { bg: 'bg-[#FAF3E0]', border: 'border-[#E2D5B5]', tape: 'bg-stone-200/80' },
-  white: { bg: 'bg-[#FFFFFF]', border: 'border-slate-300', tape: 'bg-slate-200/80' },
-  pink: { bg: 'bg-[#FFE4E6]', border: 'border-[#FDA4AF]', tape: 'bg-rose-200/80' },
-  blue: { bg: 'bg-[#E0F2FE]', border: 'border-[#7DD3FC]', tape: 'bg-sky-200/80' },
-  green: { bg: 'bg-[#DCFCE7]', border: 'border-[#86EFAC]', tape: 'bg-emerald-200/80' },
-  purple: { bg: 'bg-[#F3E8FF]', border: 'border-[#D8B4FE]', tape: 'bg-purple-200/80' },
+const COLOR_CLASSES: Record<NoteColor, { bg: string; border: string; tape: string; hex: string }> = {
+  yellow: { bg: 'bg-[#FEF08A]', border: 'border-[#EAB308]', tape: 'bg-amber-200/90', hex: '#FEF08A' },
+  cream: { bg: 'bg-[#FAF3E0]', border: 'border-[#D6C7A1]', tape: 'bg-stone-200/90', hex: '#FAF3E0' },
+  white: { bg: 'bg-[#FFFFFF]', border: 'border-slate-300', tape: 'bg-slate-200/90', hex: '#FFFFFF' },
+  pink: { bg: 'bg-[#FBCFE8]', border: 'border-[#F472B6]', tape: 'bg-rose-200/90', hex: '#FBCFE8' },
+  blue: { bg: 'bg-[#BAE6FD]', border: 'border-[#38BDF8]', tape: 'bg-sky-200/90', hex: '#BAE6FD' },
+  green: { bg: 'bg-[#BBF7D0]', border: 'border-[#4ADE80]', tape: 'bg-emerald-200/90', hex: '#BBF7D0' },
+  purple: { bg: 'bg-[#E9D5FF]', border: 'border-[#C084FC]', tape: 'bg-purple-200/90', hex: '#E9D5FF' },
 };
 
 const COLOR_OPTIONS: NoteColor[] = ['yellow', 'cream', 'white', 'pink', 'blue', 'green', 'purple'];
@@ -106,11 +106,10 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         zIndex: isDragging ? 80 : note.position.zIndex || 15,
         position: 'absolute',
       }}
-      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900/40 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing pointer-events-auto ${
-        isDragging
-          ? 'shadow-paperDrag scale-[1.02] transition-none'
-          : 'shadow-paper hover:shadow-paperHover transition-shadow duration-150'
-      }`}
+      className={`group ${sizeClasses} ${colorConfig.bg} border-2 border-slate-900 rounded-sm p-3.5 flex flex-col justify-between paper-curl-br select-none cursor-grab active:cursor-grabbing pointer-events-auto ${isDragging
+        ? 'shadow-paperDrag scale-[1.02] transition-none'
+        : 'shadow-paper hover:shadow-paperHover dark:shadow-[4px_4px_0px_#05080E] transition-shadow duration-150'
+        }`}
     >
       {/* Pin or Tape Header */}
       {note.pinType === 'red' && (
@@ -148,7 +147,7 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                 onToggleCollapse?.(note.id);
               }}
               title={isCollapsed ? 'Unfold note' : 'Fold note'}
-              className="p-1 rounded hover:bg-black/5 text-slate-600"
+              className="p-1 rounded hover:bg-black/10 text-slate-700"
             >
               {isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
             </button>
@@ -162,8 +161,9 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                     onTogglePin(note.id);
                   }}
                   title={note.isPinned ? 'Unpin' : 'Pin to top'}
-                  className={`p-1 rounded hover:bg-black/5 ${note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-500'
-                    }`}
+                  className={`p-1 rounded hover:bg-black/10 ${
+                    note.isPinned ? 'text-desk-comicRed font-bold' : 'text-slate-600'
+                  }`}
                 >
                   <Pin className="w-3.5 h-3.5" />
                 </button>
@@ -174,7 +174,7 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                     onEdit(note);
                   }}
                   title="Edit note"
-                  className="p-1 rounded hover:bg-black/5 text-slate-600"
+                  className="p-1 rounded hover:bg-black/10 text-slate-700"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
                 </button>
@@ -187,7 +187,7 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
         {!isCollapsed && (
           <div
             onClick={() => onEdit(note)}
-            className="font-handwritten text-base leading-snug text-slate-800 whitespace-pre-wrap line-clamp-5 cursor-pointer mt-1"
+            className="font-handwritten text-base leading-snug text-slate-900 font-bold whitespace-pre-wrap line-clamp-5 cursor-pointer mt-1"
           >
             {note.content || 'Tap here to scribble thoughts...'}
           </div>
@@ -196,7 +196,7 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
 
       {/* Footer: Color Switcher & Delete Button (Only shown when not collapsed) */}
       {!isCollapsed && (
-        <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-900/10">
+        <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-900/15">
           <div className="flex items-center gap-1">
             {COLOR_OPTIONS.map((c) => (
               <button
@@ -206,9 +206,10 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
                   sounds.playComicClick();
                   onColorChange(note.id, c);
                 }}
-                className={`w-3.5 h-3.5 rounded-full border border-slate-900/30 transition-transform ${note.color === c ? 'scale-125 ring-1 ring-slate-900' : 'hover:scale-110'
-                  }`}
-                style={{ backgroundColor: COLOR_CLASSES[c].bg.replace('bg-[', '').replace(']', '') }}
+                className={`w-3.5 h-3.5 rounded-full border border-slate-900/40 transition-transform ${
+                  note.color === c ? 'scale-125 ring-2 ring-slate-900' : 'hover:scale-110'
+                }`}
+                style={{ backgroundColor: COLOR_CLASSES[c].hex }}
               />
             ))}
           </div>
@@ -220,12 +221,12 @@ export const PaperNoteCard: React.FC<PaperNoteCardProps> = ({
               onDelete(note.id);
             }}
             title="Delete note"
-            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 p-0.5 transition-opacity"
+            className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-600 p-0.5 transition-opacity cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
-    </div >
+    </div>
   );
 };
